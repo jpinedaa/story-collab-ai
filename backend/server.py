@@ -1,35 +1,43 @@
+import json
+import os
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
 
-# Dummy game state
-game_state = {
-    "players": [
-        {"name": "Alice", "role": "Narrator", "status": "active"},
-        {"name": "Bob", "role": "Player", "status": "active"},
-        {"name": "Charlie", "role": "Player", "status": "inactive"}
-    ],
-    "currentSceneDescription": """
-    As you step into the ancient forest, a sense of wonder and trepidation fills your heart...
-    """,
-    "currentMoves": [
-        "Player A decides to solve the riddles.",
-        "Player B engages in combat with the shadowy figures.",
-        "Player C confronts their deepest fears and insecurities."
-    ],
-    "isNarrator": True
-}
+GAME_STATE_FILE = 'game_state.json'
+
+
+# Load game state from a JSON file
+def load_game_state():
+    if os.path.exists(GAME_STATE_FILE):
+        with open(GAME_STATE_FILE, 'r') as file:
+            return json.load(file)
+    return {
+        "players": [],
+        "currentSceneDescription": "",
+        "currentMoves": [],
+        "isNarrator": False
+    }
+
+
+# Save game state to a JSON file
+def save_game_state(game_state):
+    with open(GAME_STATE_FILE, 'w') as file:
+        json.dump(game_state, file, indent=4)
+
 
 @app.route('/gamestate', methods=['GET'])
 def get_game_state():
+    game_state = load_game_state()
     return jsonify(game_state)
 
 @app.route('/gamestate', methods=['POST'])
 def update_game_state():
-    global game_state
     game_state = request.json
+    save_game_state(game_state)
     return jsonify(game_state)
 
 if __name__ == '__main__':

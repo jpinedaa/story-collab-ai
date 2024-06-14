@@ -127,9 +127,26 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               if (selectableCards.isEmpty)
-                const Text(
-                  'No cards available.',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                Column(
+                  children: [
+                    const Text(
+                      'No cards available.',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const NewCardFormPage(fromSceneEditor: true),
+                          ),
+                        );
+                      },
+                      child: const Text('Create Card'),
+                    ),
+                  ],
                 )
               else
                 ConstrainedBox(

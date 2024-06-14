@@ -6,6 +6,7 @@ class BaseContainer extends StatelessWidget {
   final TextStyle? contentStyle;
   final bool isCentered;
   final Widget? child;
+  final VoidCallback? onDelete;
 
   const BaseContainer({
     super.key,
@@ -14,6 +15,7 @@ class BaseContainer extends StatelessWidget {
     this.contentStyle,
     this.isCentered = false,
     this.child,
+    this.onDelete,
   });
 
   @override
@@ -33,27 +35,46 @@ class BaseContainer extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          if (title.isNotEmpty)
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 18.0,
-                fontWeight: FontWeight.bold,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (title.isNotEmpty)
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              const SizedBox(height: 8.0),
+              Text(
+                content,
+                style: contentStyle ??
+                    const TextStyle(
+                      fontSize: 16.0,
+                    ),
+                textAlign: isCentered ? TextAlign.center : TextAlign.start,
+              ),
+            ],
+          ),
+          if (child != null || onDelete != null)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (child != null) child!,
+                  if (onDelete != null)
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: onDelete,
+                    ),
+                ],
               ),
             ),
-          const SizedBox(height: 8.0),
-          Text(
-            content,
-            style: contentStyle ??
-                const TextStyle(
-                  fontSize: 16.0,
-                ),
-            textAlign: isCentered ? TextAlign.center : TextAlign.start,
-          ),
-          if (child != null) child!,
         ],
       ),
     );

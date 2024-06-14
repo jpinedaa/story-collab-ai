@@ -135,4 +135,19 @@ class GameState with ChangeNotifier {
     updateGameState();
     notifyListeners();
   }
+
+  void updateScene(Scene oldScene, Scene newScene) {
+    final index = sceneAndMoves.indexOf(oldScene);
+    if (index != -1) {
+      sceneAndMoves[index] = newScene;
+      updateGameState();
+      notifyListeners();
+    }
+  }
+
+  void deleteItem(dynamic item) {
+    sceneAndMoves.remove(item);
+    updateGameState();
+    notifyListeners();
+  }
 }

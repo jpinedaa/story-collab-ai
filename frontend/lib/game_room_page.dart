@@ -127,24 +127,27 @@ class GameRoomPage extends StatelessWidget {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const SceneDisplayPage(),
+                                builder: (context) =>
+                                    SceneDisplayPage(scene: item),
                               ),
                             );
                           },
                         ),
+                        onDelete: () {
+                          gameState.deleteItem(item);
+                        },
                       );
                     } else {
                       return BaseContainer(
                         title: 'Move',
                         content: item,
+                        onDelete: () {
+                          gameState.deleteItem(item);
+                        },
                       );
                     }
                   }).toList(),
                 ),
-                const SizedBox(
-                  height: 60,
-                ), // Spacer to ensure scrolling above the button
-
                 Positioned(
                   bottom: 16.0,
                   left: 16.0,
@@ -162,7 +165,7 @@ class GameRoomPage extends StatelessWidget {
                           );
                         },
                         child: Text(player?.role == 'Narrator'
-                            ? 'Create Scene'
+                            ? 'Edit Scene'
                             : 'Make a Move'),
                       ),
                     ),

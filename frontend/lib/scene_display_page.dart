@@ -1,4 +1,3 @@
-// scene_display_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'card_state.dart';
@@ -6,7 +5,9 @@ import 'game_state.dart';
 import 'new_card_form_page.dart';
 
 class SceneDisplayPage extends StatefulWidget {
-  const SceneDisplayPage({super.key});
+  final Scene? scene;
+
+  const SceneDisplayPage({super.key, this.scene});
 
   @override
   _SceneDisplayPageState createState() => _SceneDisplayPageState();
@@ -18,6 +19,15 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
   String _description = '';
   CardModel? _selectedPlaceCard;
   final List<CardModel> _selectedChallenges = [];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.scene != null) {
+      _title = widget.scene!.title;
+      _description = widget.scene!.description;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +51,7 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Scene Editor'),
+        title: Text(widget.scene == null ? 'Scene Editor' : 'Edit Scene'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -50,6 +60,7 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
           child: Column(
             children: [
               TextFormField(
+                initialValue: _title,
                 decoration: const InputDecoration(labelText: 'Title'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -128,8 +139,8 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
                 )
               else if (allCards.isNotEmpty)
                 ConstrainedBox(
-                  constraints:
-                      const BoxConstraints(maxHeight: 200), // Set a maximum height
+                  constraints: const BoxConstraints(
+                      maxHeight: 200), // Set a maximum height
                   child: ListView(
                     shrinkWrap: true,
                     children: allCards.map((card) {
@@ -152,6 +163,7 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
               const SizedBox(height: 16.0),
               Expanded(
                 child: TextFormField(
+                  initialValue: _description,
                   decoration: const InputDecoration(
                     labelText: 'Description',
                     alignLabelWithHint: true,
@@ -178,7 +190,11 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
                     if (_formKey.currentState?.validate() ?? false) {
                       _formKey.currentState?.save();
                       final newScene = Scene(_title, _description);
-                      gameState.createScene(newScene);
+                      if (widget.scene == null) {
+                        gameState.createScene(newScene);
+                      } else {
+                        gameState.updateScene(widget.scene!, newScene);
+                      }
                       Navigator.pop(context); // Pop back to GameRoomPage
                     }
                   },

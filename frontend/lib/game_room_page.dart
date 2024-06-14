@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'card_creation_page.dart';
 import 'game_state.dart';
 import 'scene_display_page.dart';
+import 'move_editor_page.dart';
 import 'base_container.dart';
 import 'package:http/http.dart' as http;
 
@@ -141,6 +142,18 @@ class GameRoomPage extends StatelessWidget {
                       return BaseContainer(
                         title: 'Move',
                         content: item,
+                        child: IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    MoveEditorPage(move: item),
+                              ),
+                            );
+                          },
+                        ),
                         onDelete: () {
                           gameState.deleteItem(item);
                         },
@@ -160,12 +173,14 @@ class GameRoomPage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const SceneDisplayPage(),
+                              builder: (context) => player?.role == 'Narrator'
+                                  ? const SceneDisplayPage()
+                                  : const MoveEditorPage(),
                             ),
                           );
                         },
                         child: Text(player?.role == 'Narrator'
-                            ? 'Edit Scene'
+                            ? 'Create Scene'
                             : 'Make a Move'),
                       ),
                     ),

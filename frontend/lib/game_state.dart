@@ -150,4 +150,13 @@ class GameState with ChangeNotifier {
     updateGameState();
     notifyListeners();
   }
+
+  void updateMove(String oldMove, String newMove) {
+    final index = sceneAndMoves.indexOf(oldMove);
+    if (index != -1) {
+      sceneAndMoves[index] = newMove;
+      updateGameState();
+      notifyListeners();
+    }
+  }
 }

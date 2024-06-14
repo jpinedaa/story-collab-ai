@@ -31,14 +31,14 @@ class Player {
       };
 }
 
-class Scene {
+class SceneComponent {
   final String title;
   final String description;
 
-  Scene(this.title, this.description);
+  SceneComponent(this.title, this.description);
 
-  factory Scene.fromJson(Map<String, dynamic> json) {
-    return Scene(json['title'], json['description']);
+  factory SceneComponent.fromJson(Map<String, dynamic> json) {
+    return SceneComponent(json['title'], json['description']);
   }
 
   Map<String, dynamic> toJson() => {
@@ -68,7 +68,7 @@ class GameState with ChangeNotifier {
           .toList();
       sceneAndMoves = List<dynamic>.from(data['sceneAndMoves'].map((item) {
         if (item['title'] != null) {
-          return Scene.fromJson(item);
+          return SceneComponent.fromJson(item);
         } else {
           return item; // it's a move (String)
         }
@@ -96,7 +96,7 @@ class GameState with ChangeNotifier {
       body: json.encode({
         'players': players.map((player) => player.toJson()).toList(),
         'sceneAndMoves': sceneAndMoves.map((item) {
-          if (item is Scene) {
+          if (item is SceneComponent) {
             return item.toJson();
           } else {
             return item; // it's a move (String)
@@ -130,16 +130,17 @@ class GameState with ChangeNotifier {
     return true;
   }
 
-  void createScene(Scene scene) {
-    sceneAndMoves.add(scene);
+  void createSceneComponent(SceneComponent sceneComponent) {
+    sceneAndMoves.add(sceneComponent);
     updateGameState();
     notifyListeners();
   }
 
-  void updateScene(Scene oldScene, Scene newScene) {
-    final index = sceneAndMoves.indexOf(oldScene);
+  void updateSceneComponent(
+      SceneComponent oldSceneComponent, SceneComponent newSceneComponent) {
+    final index = sceneAndMoves.indexOf(oldSceneComponent);
     if (index != -1) {
-      sceneAndMoves[index] = newScene;
+      sceneAndMoves[index] = newSceneComponent;
       updateGameState();
       notifyListeners();
     }

@@ -121,7 +121,7 @@ class GameRoomPage extends StatelessWidget {
                 ListView(
                   padding: const EdgeInsets.all(8.0),
                   children: gameState.sceneAndMoves.map<Widget>((item) {
-                    if (item is Scene) {
+                    if (item is SceneComponent) {
                       return BaseContainer(
                         title: item.title,
                         content: item.description,
@@ -132,7 +132,7 @@ class GameRoomPage extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    SceneDisplayPage(scene: item),
+                                    SceneDisplayPage(sceneComponent: item),
                               ),
                             );
                           },

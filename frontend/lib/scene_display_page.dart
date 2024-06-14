@@ -5,9 +5,9 @@ import 'game_state.dart';
 import 'new_card_form_page.dart';
 
 class SceneDisplayPage extends StatefulWidget {
-  final Scene? scene;
+  final SceneComponent? sceneComponent;
 
-  const SceneDisplayPage({super.key, this.scene});
+  const SceneDisplayPage({super.key, this.sceneComponent});
 
   @override
   _SceneDisplayPageState createState() => _SceneDisplayPageState();
@@ -23,9 +23,9 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.scene != null) {
-      _title = widget.scene!.title;
-      _description = widget.scene!.description;
+    if (widget.sceneComponent != null) {
+      _title = widget.sceneComponent!.title;
+      _description = widget.sceneComponent!.description;
     }
   }
 
@@ -61,7 +61,8 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.scene == null ? 'Scene Editor' : 'Edit Scene'),
+        title:
+            Text(widget.sceneComponent == null ? 'Scene Editor' : 'Edit Scene'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -209,11 +210,13 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
                   onPressed: () {
                     if (_formKey.currentState?.validate() ?? false) {
                       _formKey.currentState?.save();
-                      final newScene = Scene(_title, _description);
-                      if (widget.scene == null) {
-                        gameState.createScene(newScene);
+                      final newSceneComponent =
+                          SceneComponent(_title, _description);
+                      if (widget.sceneComponent == null) {
+                        gameState.createSceneComponent(newSceneComponent);
                       } else {
-                        gameState.updateScene(widget.scene!, newScene);
+                        gameState.updateSceneComponent(
+                            widget.sceneComponent!, newSceneComponent);
                       }
                       Navigator.pop(context); // Pop back to GameRoomPage
                     }

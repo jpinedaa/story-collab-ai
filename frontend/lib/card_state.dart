@@ -30,10 +30,7 @@ enum CardType {
   Goal,
 }
 
-enum PlayerStatus {
-  Manual,
-  Auto,
-}
+enum PlayerStatus { Manual, Auto, NPC }
 
 class CardModel {
   final String title;

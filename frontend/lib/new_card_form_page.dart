@@ -10,11 +10,12 @@ class NewCardFormPage extends StatefulWidget {
   final CardType? preselectedCardType;
   final bool fromSceneEditor;
 
-  const NewCardFormPage(
-      {super.key,
-      this.card,
-      this.preselectedCardType,
-      this.fromSceneEditor = false});
+  const NewCardFormPage({
+    super.key,
+    this.card,
+    this.preselectedCardType,
+    this.fromSceneEditor = false,
+  });
 
   @override
   _NewCardFormPageState createState() => _NewCardFormPageState();

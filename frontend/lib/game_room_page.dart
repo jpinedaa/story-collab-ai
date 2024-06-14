@@ -1,4 +1,3 @@
-// game_room_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'card_creation_page.dart';
@@ -28,9 +27,13 @@ class GameRoomPage extends StatelessWidget {
                     height: 100.0,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: gameState.players.length,
+                      itemCount: gameState.players
+                          .where((player) => player.status != 'NPC')
+                          .length,
                       itemBuilder: (context, index) {
-                        final player = gameState.players[index];
+                        final player = gameState.players
+                            .where((player) => player.status != 'NPC')
+                            .toList()[index];
                         final isSelected = gameState.selectedPlayer == player;
 
                         return GestureDetector(

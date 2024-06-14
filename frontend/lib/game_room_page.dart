@@ -4,6 +4,7 @@ import 'card_creation_page.dart';
 import 'game_state.dart';
 import 'scene_display_page.dart';
 import 'base_container.dart';
+import 'package:http/http.dart' as http;
 
 class GameRoomPage extends StatelessWidget {
   const GameRoomPage({super.key});
@@ -11,9 +12,9 @@ class GameRoomPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gameState = Provider.of<GameState>(context);
+    final player = gameState.selectedPlayer;
 
     return Scaffold(
-      backgroundColor: Colors.lightBlue[50], // Set the background color here
       body: Column(
         children: [
           Padding(
@@ -36,8 +37,8 @@ class GameRoomPage extends StatelessWidget {
                           },
                           child: Container(
                             width: 100,
-                            margin: EdgeInsets.all(8.0),
-                            padding: EdgeInsets.all(8.0),
+                            margin: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(8.0),
                             decoration: BoxDecoration(
                               color:
                                   isSelected ? Colors.blueAccent : Colors.white,
@@ -47,7 +48,7 @@ class GameRoomPage extends StatelessWidget {
                                   color: Colors.grey.withOpacity(0.5),
                                   spreadRadius: 2,
                                   blurRadius: 5,
-                                  offset: Offset(0, 3),
+                                  offset: const Offset(0, 3),
                                 ),
                               ],
                             ),
@@ -88,14 +89,22 @@ class GameRoomPage extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.add_circle_outline,
+                  icon: const Icon(Icons.add_circle_outline,
                       color: Colors.blue, size: 30.0),
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => CardCreationPage()),
+                          builder: (context) => const CardCreationPage()),
                     );
+                  },
+                ),
+                IconButton(
+                  icon:
+                      const Icon(Icons.refresh, color: Colors.red, size: 30.0),
+                  onPressed: () async {
+                    await resetGameState();
+                    gameState.fetchGameState();
                   },
                 ),
               ],
@@ -107,19 +116,33 @@ class GameRoomPage extends StatelessWidget {
                 ListView(
                   padding: const EdgeInsets.all(8.0),
                   children: [
-                    // BaseContainer for scene description
-                    BaseContainer(
-                      title: 'Scene Description',
-                      content: gameState.currentSceneDescription,
-                    ),
-                    // BaseContainers for each move
-                    ...gameState.currentMoves.map((move) => BaseContainer(
+                    if (gameState.currentSceneDescription.isEmpty)
+                      const BaseContainer(
+                        title: '',
+                        content: 'Start a new scene as a narrator',
+                        contentStyle: TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          decoration: TextDecoration.none,
+                        ),
+                        isCentered: true,
+                      )
+                    else ...[
+                      BaseContainer(
+                        title: 'Scene Description',
+                        content: gameState.currentSceneDescription,
+                      ),
+                      ...gameState.currentMoves.map(
+                        (move) => BaseContainer(
                           title: 'Move',
                           content: move,
-                        )),
-                    SizedBox(
-                        height:
-                            60), // Spacer to ensure scrolling above the button
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 60,
+                      ), // Spacer to ensure scrolling above the button
+                    ],
                   ],
                 ),
                 Positioned(
@@ -128,21 +151,17 @@ class GameRoomPage extends StatelessWidget {
                   right: 16.0,
                   child: Center(
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: ElevatedButton(
                         onPressed: () {
-                          if (gameState.isNarrator) {
-                            gameState.startNewScene();
-                          } else {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const SceneDisplayPage()),
-                            );
-                          }
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SceneDisplayPage(),
+                            ),
+                          );
                         },
-                        child: Text(gameState.isNarrator
+                        child: Text(player?.role == 'Narrator'
                             ? 'Start New Scene'
                             : 'Make a Move'),
                       ),
@@ -155,5 +174,13 @@ class GameRoomPage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> resetGameState() async {
+    const url = 'http://127.0.0.1:5000/gamestate/reset';
+    final response = await http.post(Uri.parse(url));
+    if (response.statusCode != 200) {
+      throw Exception('Failed to reset game state');
+    }
   }
 }

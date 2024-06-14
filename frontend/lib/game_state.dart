@@ -9,16 +9,25 @@ class Player {
   String status;
   List<CardModel> cards;
 
-  Player(this.name, this.role, this.status, {this.cards = const []});
+  Player(this.name, this.role, this.status, {List<CardModel>? cards})
+      : cards = cards ?? [];
 
   factory Player.fromJson(Map<String, dynamic> json) {
-    return Player(json['name'], json['role'], json['status']);
+    return Player(
+      json['name'],
+      json['role'],
+      json['status'],
+      cards: (json['cards'] as List<dynamic>?)
+          ?.map((card) => CardModel.fromJson(card))
+          .toList(),
+    );
   }
 
   Map<String, dynamic> toJson() => {
         'name': name,
         'role': role,
         'status': status,
+        'cards': cards.map((card) => card.toJson()).toList(),
       };
 }
 
@@ -33,7 +42,6 @@ class GameState with ChangeNotifier {
   List<Player> players = [];
   String currentSceneDescription = '';
   List<String> currentMoves = [];
-  bool isNarrator = true;
   List<Challenge> challenges = [];
   Player? selectedPlayer;
 
@@ -52,13 +60,12 @@ class GameState with ChangeNotifier {
           .toList();
       currentSceneDescription = data['currentSceneDescription'];
       currentMoves = List<String>.from(data['currentMoves']);
-      isNarrator = data['isNarrator'];
       notifyListeners();
 
       // Ensure there is a narrator
       final narrator =
           players.firstWhere((player) => player.role == 'Narrator', orElse: () {
-        final newNarrator = Player('Narrator', 'Narrator', 'active');
+        final newNarrator = Player('', 'Narrator', 'Manual');
         players.add(newNarrator);
         return newNarrator;
       });
@@ -78,12 +85,12 @@ class GameState with ChangeNotifier {
         'players': players.map((player) => player.toJson()).toList(),
         'currentSceneDescription': currentSceneDescription,
         'currentMoves': currentMoves,
-        'isNarrator': isNarrator,
       }),
     );
     if (response.statusCode != 200) {
       throw Exception('Failed to update game state');
     }
+    notifyListeners(); // Ensure UI update
   }
 
   void selectPlayer(Player player) {
@@ -91,11 +98,15 @@ class GameState with ChangeNotifier {
     notifyListeners();
   }
 
-  void startNewScene() {
+  void addPlayer(Player player) {
+    players.add(player);
+    notifyListeners();
+  }
+
+  Future<void> startNewScene() async {
     currentSceneDescription = 'A new scene description goes here.';
     currentMoves = ['New move 1', 'New move 2', 'New move 3'];
-    updateGameState();
-    notifyListeners();
+    await updateGameState();
   }
 
   void makeMove(String move) {

@@ -22,6 +22,12 @@ class MyApp extends StatelessWidget {
         title: 'Narravive',
         theme: ThemeData(
           primarySwatch: Colors.blue,
+          scaffoldBackgroundColor:
+              Colors.lightBlue[50], // Set global background color here
+          appBarTheme: const AppBarTheme(
+            backgroundColor:
+                Colors.lightBlueAccent, // Set global app bar color here
+          ),
         ),
         home: const GameRoomPage(),
       ),

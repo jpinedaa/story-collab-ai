@@ -3,8 +3,16 @@ import 'package:flutter/material.dart';
 class BaseContainer extends StatelessWidget {
   final String title;
   final String content;
+  final TextStyle? contentStyle;
+  final bool isCentered;
 
-  const BaseContainer({super.key, required this.title, required this.content});
+  const BaseContainer({
+    super.key,
+    required this.title,
+    required this.content,
+    this.contentStyle,
+    this.isCentered = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,17 +34,22 @@ class BaseContainer extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 18.0,
-              fontWeight: FontWeight.bold,
+          if (title.isNotEmpty)
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
           const SizedBox(height: 8.0),
           Text(
             content,
-            style: const TextStyle(fontSize: 16.0),
+            style: contentStyle ??
+                const TextStyle(
+                  fontSize: 16.0,
+                ),
+            textAlign: isCentered ? TextAlign.center : TextAlign.start,
           ),
         ],
       ),

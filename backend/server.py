@@ -18,8 +18,7 @@ def load_game_state():
     return {
         "players": [],
         "currentSceneDescription": "",
-        "currentMoves": [],
-        "isNarrator": False
+        "currentMoves": []
     }
 
 
@@ -39,6 +38,16 @@ def update_game_state():
     game_state = request.json
     save_game_state(game_state)
     return jsonify(game_state)
+
+@app.route('/gamestate/reset', methods=['POST'])
+def reset_game_state():
+    initial_state = {
+        "players": [],
+        "currentSceneDescription": "",
+        "currentMoves": []
+    }
+    save_game_state(initial_state)
+    return jsonify(initial_state)
 
 if __name__ == '__main__':
     app.run(debug=True)

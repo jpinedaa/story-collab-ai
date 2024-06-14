@@ -103,12 +103,6 @@ class GameState with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> startNewScene() async {
-    currentSceneDescription = 'A new scene description goes here.';
-    currentMoves = ['New move 1', 'New move 2', 'New move 3'];
-    await updateGameState();
-  }
-
   void makeMove(String move) {
     currentMoves.add(move);
     updateGameState();

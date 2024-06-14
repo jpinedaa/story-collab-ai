@@ -39,8 +39,7 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
         gameState.currentSceneDescription.isEmpty) {
       final placeCards =
           player.cards.where((card) => card.type == CardType.Place).toList();
-      final challengeCards =
-          player.cards.where((card) => card.type == CardType.Obstacle).toList();
+      final allCards = player.cards.toList();
 
       return Scaffold(
         appBar: AppBar(
@@ -78,7 +77,8 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => const NewCardFormPage(
-                                  preselectedCardType: CardType.Place),
+                                  preselectedCardType: CardType.Place,
+                                  fromSceneEditor: true),
                             ),
                           );
                         },
@@ -100,23 +100,17 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
                         _selectedPlaceCard = value;
                       });
                     },
-                    validator: (value) {
-                      if (value == null) {
-                        return 'Please select a place card';
-                      }
-                      return null;
-                    },
                   ),
                 const SizedBox(height: 16.0),
                 const Text(
-                  'Select Challenge Cards',
+                  'Select Cards',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                if (challengeCards.isEmpty)
+                if (allCards.isEmpty)
                   Column(
                     children: [
                       const Text(
-                        'No challenge cards available.',
+                        'No cards available.',
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold),
                       ),
@@ -125,22 +119,22 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const NewCardFormPage(
-                                  preselectedCardType: CardType.Obstacle),
+                              builder: (context) =>
+                                  const NewCardFormPage(fromSceneEditor: true),
                             ),
                           );
                         },
-                        child: const Text('Create Challenge Card'),
+                        child: const Text('Create Card'),
                       ),
                     ],
                   )
-                else if (challengeCards.isNotEmpty)
+                else if (allCards.isNotEmpty)
                   ConstrainedBox(
                     constraints:
                         BoxConstraints(maxHeight: 200), // Set a maximum height
                     child: ListView(
                       shrinkWrap: true,
-                      children: challengeCards.map((card) {
+                      children: allCards.map((card) {
                         return CheckboxListTile(
                           title: Text(card.title),
                           value: _selectedChallenges.contains(card),
@@ -186,22 +180,12 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
                       if (_formKey.currentState?.validate() ?? false) {
                         _formKey.currentState?.save();
                         gameState.currentSceneDescription = _description;
-                        gameState.currentMoves = [
-                          'New move 1',
-                          'New move 2',
-                          'New move 3'
-                        ];
                         gameState.updateGameState().then((_) {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const SceneDisplayPage()),
-                          );
+                          Navigator.pop(context); // Pop back to GameRoomPage
                         });
                       }
                     },
-                    child: const Text('Start New Scene'),
+                    child: const Text('Save'),
                   ),
                 ),
               ],
@@ -281,7 +265,7 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
                 },
                 child: Text(player.role == 'Narrator'
                     ? (gameState.currentSceneDescription.isEmpty
-                        ? 'Start New Scene'
+                        ? 'Save'
                         : 'Edit Scene')
                     : 'Play Card'),
               ),

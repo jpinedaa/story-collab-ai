@@ -119,7 +119,8 @@ class GameRoomPage extends StatelessWidget {
                     if (gameState.currentSceneDescription.isEmpty)
                       const BaseContainer(
                         title: '',
-                        content: 'Start a new scene as a narrator',
+                        content:
+                            'Edit scene to start a new scene as a narrator',
                         contentStyle: TextStyle(
                           fontSize: 18.0,
                           fontWeight: FontWeight.bold,
@@ -132,6 +133,17 @@ class GameRoomPage extends StatelessWidget {
                       BaseContainer(
                         title: 'Scene Description',
                         content: gameState.currentSceneDescription,
+                        child: IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const SceneDisplayPage(),
+                              ),
+                            );
+                          },
+                        ),
                       ),
                       ...gameState.currentMoves.map(
                         (move) => BaseContainer(
@@ -162,7 +174,7 @@ class GameRoomPage extends StatelessWidget {
                           );
                         },
                         child: Text(player?.role == 'Narrator'
-                            ? 'Start New Scene'
+                            ? 'Create Scene'
                             : 'Make a Move'),
                       ),
                     ),

@@ -1,16 +1,20 @@
-// new_card_form_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'card_state.dart';
 import 'game_state.dart';
 import 'card_creation_page.dart';
+import 'scene_display_page.dart';
 
 class NewCardFormPage extends StatefulWidget {
   final CardModel? card;
-  final CardType?
-      preselectedCardType; // Add this line to take preselected card type
+  final CardType? preselectedCardType;
+  final bool fromSceneEditor;
 
-  const NewCardFormPage({super.key, this.card, this.preselectedCardType});
+  const NewCardFormPage(
+      {super.key,
+      this.card,
+      this.preselectedCardType,
+      this.fromSceneEditor = false});
 
   @override
   _NewCardFormPageState createState() => _NewCardFormPageState();
@@ -21,7 +25,7 @@ class _NewCardFormPageState extends State<NewCardFormPage> {
   String? _selectedCardType;
   String _description = '';
   String _title = '';
-  String? _selectedPlayerStatus; // Added for player status
+  String? _selectedPlayerStatus;
 
   @override
   void initState() {
@@ -198,13 +202,23 @@ class _NewCardFormPageState extends State<NewCardFormPage> {
                       player.cards[index] = newCard;
                     }
                     gameState.updateGameState().then((_) {
-                      Navigator.pop(context); // Pop the form page
-                      Navigator.pop(context); // Pop back to CardCreationPage
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const CardCreationPage()),
-                      );
+                      if (widget.fromSceneEditor) {
+                        Navigator.pop(context); // Pop the form page
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SceneDisplayPage(),
+                          ),
+                        );
+                      } else {
+                        Navigator.pop(context); // Pop the form page
+                        Navigator.pop(context); // Pop back to CardCreationPage
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const CardCreationPage()),
+                        );
+                      }
                     });
                   }
                 },

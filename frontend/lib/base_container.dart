@@ -5,6 +5,7 @@ class BaseContainer extends StatelessWidget {
   final String content;
   final TextStyle? contentStyle;
   final bool isCentered;
+  final Widget? child;
 
   const BaseContainer({
     super.key,
@@ -12,6 +13,7 @@ class BaseContainer extends StatelessWidget {
     required this.content,
     this.contentStyle,
     this.isCentered = false,
+    this.child,
   });
 
   @override
@@ -51,6 +53,7 @@ class BaseContainer extends StatelessWidget {
                 ),
             textAlign: isCentered ? TextAlign.center : TextAlign.start,
           ),
+          if (child != null) child!,
         ],
       ),
     );

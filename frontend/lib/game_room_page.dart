@@ -1,3 +1,4 @@
+// game_room_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'card_creation_page.dart';
@@ -116,45 +117,30 @@ class GameRoomPage extends StatelessWidget {
                 ListView(
                   padding: const EdgeInsets.all(8.0),
                   children: [
-                    if (gameState.currentSceneDescription.isEmpty)
-                      const BaseContainer(
-                        title: '',
-                        content:
-                            'Edit scene to start a new scene as a narrator',
-                        contentStyle: TextStyle(
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                          decoration: TextDecoration.none,
-                        ),
-                        isCentered: true,
-                      )
-                    else ...[
-                      BaseContainer(
-                        title: 'Scene Description',
-                        content: gameState.currentSceneDescription,
-                        child: IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const SceneDisplayPage(),
-                              ),
-                            );
-                          },
-                        ),
+                    BaseContainer(
+                      title: 'Scene Description',
+                      content: gameState.currentSceneDescription,
+                      child: IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.blue),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SceneDisplayPage(),
+                            ),
+                          );
+                        },
                       ),
-                      ...gameState.currentMoves.map(
-                        (move) => BaseContainer(
-                          title: 'Move',
-                          content: move,
-                        ),
+                    ),
+                    ...gameState.currentMoves.map(
+                      (move) => BaseContainer(
+                        title: 'Move',
+                        content: move,
                       ),
-                      const SizedBox(
-                        height: 60,
-                      ), // Spacer to ensure scrolling above the button
-                    ],
+                    ),
+                    const SizedBox(
+                      height: 60,
+                    ), // Spacer to ensure scrolling above the button
                   ],
                 ),
                 Positioned(

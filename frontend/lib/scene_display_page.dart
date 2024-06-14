@@ -26,6 +26,7 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
     if (widget.sceneComponent != null) {
       _title = widget.sceneComponent!.title;
       _description = widget.sceneComponent!.description;
+      _selectedPlaceCard = widget.sceneComponent!.placeCard;
     }
   }
 
@@ -108,6 +109,7 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
                 )
               else
                 DropdownButtonFormField<CardModel>(
+                  value: _selectedPlaceCard,
                   decoration: const InputDecoration(labelText: 'Place Card'),
                   items: placeCards
                       .map((card) => DropdownMenuItem<CardModel>(
@@ -227,8 +229,11 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
                   onPressed: () {
                     if (_formKey.currentState?.validate() ?? false) {
                       _formKey.currentState?.save();
-                      final newSceneComponent =
-                          SceneComponent(_title, _description);
+                      final newSceneComponent = SceneComponent(
+                        _title,
+                        _description,
+                        placeCard: _selectedPlaceCard,
+                      );
                       if (widget.sceneComponent == null) {
                         gameState.createSceneComponent(newSceneComponent);
                       } else {

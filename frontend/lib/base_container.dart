@@ -6,6 +6,7 @@ class BaseContainer extends StatelessWidget {
   final TextStyle? contentStyle;
   final bool isCentered;
   final Widget? child;
+  final Widget? contentBelowTitle; // Add this line
   final VoidCallback? onDelete;
 
   const BaseContainer({
@@ -15,6 +16,7 @@ class BaseContainer extends StatelessWidget {
     this.contentStyle,
     this.isCentered = false,
     this.child,
+    this.contentBelowTitle, // Add this line
     this.onDelete,
   });
 
@@ -48,6 +50,10 @@ class BaseContainer extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+              if (contentBelowTitle != null) ...[
+                const SizedBox(height: 8.0),
+                contentBelowTitle!, // Add this line
+              ],
               const SizedBox(height: 8.0),
               Text(
                 content,

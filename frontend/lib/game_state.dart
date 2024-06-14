@@ -34,16 +34,25 @@ class Player {
 class SceneComponent {
   final String title;
   final String description;
+  final CardModel? placeCard; // Add this line
 
-  SceneComponent(this.title, this.description);
+  SceneComponent(this.title, this.description,
+      {this.placeCard}); // Update the constructor
 
   factory SceneComponent.fromJson(Map<String, dynamic> json) {
-    return SceneComponent(json['title'], json['description']);
+    return SceneComponent(
+      json['title'],
+      json['description'],
+      placeCard: json['placeCard'] != null
+          ? CardModel.fromJson(json['placeCard'])
+          : null, // Add this line
+    );
   }
 
   Map<String, dynamic> toJson() => {
         'title': title,
         'description': description,
+        'placeCard': placeCard?.toJson(), // Add this line
       };
 }
 

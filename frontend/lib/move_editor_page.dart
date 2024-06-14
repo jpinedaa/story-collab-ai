@@ -9,10 +9,10 @@ class MoveEditorPage extends StatefulWidget {
   const MoveEditorPage({super.key, this.move});
 
   @override
-  _MoveEditorPageState createState() => _MoveEditorPageState();
+  MoveEditorPageState createState() => MoveEditorPageState();
 }
 
-class _MoveEditorPageState extends State<MoveEditorPage> {
+class MoveEditorPageState extends State<MoveEditorPage> {
   final _formKey = GlobalKey<FormState>();
   String _description = '';
   final List<CardModel> _selectedChallenges = [];

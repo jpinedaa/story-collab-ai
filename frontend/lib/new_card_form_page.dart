@@ -18,10 +18,10 @@ class NewCardFormPage extends StatefulWidget {
   });
 
   @override
-  _NewCardFormPageState createState() => _NewCardFormPageState();
+  NewCardFormPageState createState() => NewCardFormPageState();
 }
 
-class _NewCardFormPageState extends State<NewCardFormPage> {
+class NewCardFormPageState extends State<NewCardFormPage> {
   final _formKey = GlobalKey<FormState>();
   String? _selectedCardType;
   String _description = '';

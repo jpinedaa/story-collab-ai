@@ -34,10 +34,12 @@ class Player {
 class SceneComponent {
   final String title;
   final String description;
-  final CardModel? placeCard; // Add this line
+  final CardModel? placeCard;
+  final List<CardModel> selectedCards; // Add this line
 
   SceneComponent(this.title, this.description,
-      {this.placeCard}); // Update the constructor
+      {this.placeCard,
+      this.selectedCards = const []}); // Update the constructor
 
   factory SceneComponent.fromJson(Map<String, dynamic> json) {
     return SceneComponent(
@@ -46,6 +48,10 @@ class SceneComponent {
       placeCard: json['placeCard'] != null
           ? CardModel.fromJson(json['placeCard'])
           : null, // Add this line
+      selectedCards: (json['selectedCards'] as List<dynamic>?)
+              ?.map((card) => CardModel.fromJson(card))
+              .toList() ??
+          [], // Add this line
     );
   }
 
@@ -53,6 +59,9 @@ class SceneComponent {
         'title': title,
         'description': description,
         'placeCard': placeCard?.toJson(), // Add this line
+        'selectedCards': selectedCards
+            .map((card) => card.toJson())
+            .toList(), // Add this line
       };
 }
 
@@ -71,7 +80,6 @@ class GameState with ChangeNotifier {
     final response = await http.get(Uri.parse(backendUrl));
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      print('Fetched data: $data'); // Debugging: print fetched data
       players = (data['players'] as List)
           .map((player) => Player.fromJson(player))
           .toList();

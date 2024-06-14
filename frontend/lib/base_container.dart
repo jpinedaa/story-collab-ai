@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'mini_card.dart';
+import 'card_state.dart';
 
 class BaseContainer extends StatelessWidget {
   final String title;
@@ -6,7 +8,8 @@ class BaseContainer extends StatelessWidget {
   final TextStyle? contentStyle;
   final bool isCentered;
   final Widget? child;
-  final Widget? contentBelowTitle; // Add this line
+  final CardModel? placeCard;
+  final List<CardModel> selectedCards; // Add this line
   final VoidCallback? onDelete;
 
   const BaseContainer({
@@ -16,7 +19,8 @@ class BaseContainer extends StatelessWidget {
     this.contentStyle,
     this.isCentered = false,
     this.child,
-    this.contentBelowTitle, // Add this line
+    this.placeCard,
+    this.selectedCards = const [],
     this.onDelete,
   });
 
@@ -50,9 +54,57 @@ class BaseContainer extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              if (contentBelowTitle != null) ...[
+              if (placeCard != null || selectedCards.isNotEmpty) ...[
                 const SizedBox(height: 8.0),
-                contentBelowTitle!, // Add this line
+                SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        if (placeCard != null) ...[
+                          const SizedBox(height: 8.0),
+                          Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                            child: Column(
+                              children: [
+                                MiniCard(card: placeCard!),
+                                const SizedBox(height: 4.0),
+                                const Text(
+                                  "Place",
+                                  style: TextStyle(fontSize: 12.0),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          )
+                        ],
+                        if (selectedCards.isNotEmpty) ...[
+                          ...selectedCards.map<Widget>((card) {
+                            String label = '';
+                            if (card.type == CardType.Obstacle ||
+                                card.type == CardType.Character) {
+                              label = 'Challenge';
+                            } else {
+                              label = 'Pickup';
+                            }
+                            return Container(
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 4.0),
+                              child: Column(
+                                children: [
+                                  MiniCard(card: card),
+                                  const SizedBox(height: 4.0),
+                                  Text(
+                                    label,
+                                    style: const TextStyle(fontSize: 12.0),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
+                        ],
+                      ],
+                    ))
               ],
               const SizedBox(height: 8.0),
               Text(

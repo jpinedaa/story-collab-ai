@@ -10,10 +10,10 @@ class SceneDisplayPage extends StatefulWidget {
   const SceneDisplayPage({super.key, this.sceneComponent});
 
   @override
-  _SceneDisplayPageState createState() => _SceneDisplayPageState();
+  SceneDisplayPageState createState() => SceneDisplayPageState();
 }
 
-class _SceneDisplayPageState extends State<SceneDisplayPage> {
+class SceneDisplayPageState extends State<SceneDisplayPage> {
   final _formKey = GlobalKey<FormState>();
   String _title = '';
   String _description = '';
@@ -27,6 +27,7 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
       _title = widget.sceneComponent!.title;
       _description = widget.sceneComponent!.description;
       _selectedPlaceCard = widget.sceneComponent!.placeCard;
+      _selectedChallenges.addAll(widget.sceneComponent!.selectedCards);
     }
   }
 
@@ -233,6 +234,7 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
                         _title,
                         _description,
                         placeCard: _selectedPlaceCard,
+                        selectedCards: _selectedChallenges,
                       );
                       if (widget.sceneComponent == null) {
                         gameState.createSceneComponent(newSceneComponent);

@@ -5,7 +5,6 @@ import 'game_state.dart';
 import 'scene_display_page.dart';
 import 'move_editor_page.dart';
 import 'base_container.dart';
-import 'mini_card.dart'; // Import MiniCard
 import 'package:http/http.dart' as http;
 
 class GameRoomPage extends StatelessWidget {
@@ -126,6 +125,8 @@ class GameRoomPage extends StatelessWidget {
                       return BaseContainer(
                         title: item.title,
                         content: item.description,
+                        placeCard: item.placeCard,
+                        selectedCards: item.selectedCards,
                         child: IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
                           onPressed: () {
@@ -141,10 +142,6 @@ class GameRoomPage extends StatelessWidget {
                         onDelete: () {
                           gameState.deleteItem(item);
                         },
-                        // Add this part to display place card as MiniCard
-                        contentBelowTitle: item.placeCard != null
-                            ? MiniCard(card: item.placeCard!)
-                            : null,
                       );
                     } else {
                       return BaseContainer(

@@ -47,7 +47,17 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
 
     final placeCards =
         player.cards.where((card) => card.type == CardType.Place).toList();
-    final allCards = player.cards.toList();
+    final selectableCards = player.cards
+        .where((card) =>
+            card.type != CardType.Character ||
+            card.playerStatus == PlayerStatus.NPC)
+        .map((card) {
+      String label =
+          (card.type == CardType.Obstacle || card.type == CardType.Character)
+              ? 'Challenge'
+              : 'Pickup';
+      return SelectableCard(card, label);
+    }).toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -115,47 +125,57 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
                 'Select Cards',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              if (allCards.isEmpty)
-                Column(
-                  children: [
-                    const Text(
-                      'No cards available.',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const NewCardFormPage(fromSceneEditor: true),
-                          ),
-                        );
-                      },
-                      child: const Text('Create Card'),
-                    ),
-                  ],
+              if (selectableCards.isEmpty)
+                const Text(
+                  'No cards available.',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 )
-              else if (allCards.isNotEmpty)
+              else
                 ConstrainedBox(
                   constraints: const BoxConstraints(
                       maxHeight: 200), // Set a maximum height
                   child: ListView(
                     shrinkWrap: true,
-                    children: allCards.map((card) {
-                      return CheckboxListTile(
-                        title: Text(card.title),
-                        value: _selectedChallenges.contains(card),
-                        onChanged: (bool? value) {
-                          setState(() {
-                            if (value == true) {
-                              _selectedChallenges.add(card);
-                            } else {
-                              _selectedChallenges.remove(card);
-                            }
-                          });
-                        },
+                    children: selectableCards.map((selectableCard) {
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Text(
+                                  selectableCard.card.title,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    selectableCard.card.description,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(selectableCard.label),
+                          Checkbox(
+                            value: _selectedChallenges
+                                .contains(selectableCard.card),
+                            onChanged: (bool? value) {
+                              setState(() {
+                                if (value == true) {
+                                  _selectedChallenges.add(selectableCard.card);
+                                } else {
+                                  _selectedChallenges
+                                      .remove(selectableCard.card);
+                                }
+                              });
+                            },
+                          ),
+                        ],
                       );
                     }).toList(),
                   ),

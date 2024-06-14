@@ -72,3 +72,10 @@ class CardModel {
     );
   }
 }
+
+class SelectableCard {
+  final CardModel card;
+  final String label;
+
+  SelectableCard(this.card, this.label);
+}

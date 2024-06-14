@@ -116,33 +116,35 @@ class GameRoomPage extends StatelessWidget {
               children: [
                 ListView(
                   padding: const EdgeInsets.all(8.0),
-                  children: [
-                    BaseContainer(
-                      title: 'Scene Description',
-                      content: gameState.currentSceneDescription,
-                      child: IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.blue),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const SceneDisplayPage(),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    ...gameState.currentMoves.map(
-                      (move) => BaseContainer(
+                  children: gameState.sceneAndMoves.map<Widget>((item) {
+                    if (item is Scene) {
+                      return BaseContainer(
+                        title: item.title,
+                        content: item.description,
+                        child: IconButton(
+                          icon: const Icon(Icons.edit, color: Colors.blue),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const SceneDisplayPage(),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    } else {
+                      return BaseContainer(
                         title: 'Move',
-                        content: move,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 60,
-                    ), // Spacer to ensure scrolling above the button
-                  ],
+                        content: item,
+                      );
+                    }
+                  }).toList(),
                 ),
+                const SizedBox(
+                  height: 60,
+                ), // Spacer to ensure scrolling above the button
+
                 Positioned(
                   bottom: 16.0,
                   left: 16.0,

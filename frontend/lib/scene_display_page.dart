@@ -129,7 +129,7 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
               else if (allCards.isNotEmpty)
                 ConstrainedBox(
                   constraints:
-                      BoxConstraints(maxHeight: 200), // Set a maximum height
+                      const BoxConstraints(maxHeight: 200), // Set a maximum height
                   child: ListView(
                     shrinkWrap: true,
                     children: allCards.map((card) {
@@ -177,10 +177,9 @@ class _SceneDisplayPageState extends State<SceneDisplayPage> {
                   onPressed: () {
                     if (_formKey.currentState?.validate() ?? false) {
                       _formKey.currentState?.save();
-                      gameState.currentSceneDescription = _description;
-                      gameState.updateGameState().then((_) {
-                        Navigator.pop(context); // Pop back to GameRoomPage
-                      });
+                      final newScene = Scene(_title, _description);
+                      gameState.createScene(newScene);
+                      Navigator.pop(context); // Pop back to GameRoomPage
                     }
                   },
                   child: const Text('Save'),

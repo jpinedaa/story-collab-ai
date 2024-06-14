@@ -8,6 +8,10 @@ app = Flask(__name__)
 CORS(app)
 
 GAME_STATE_FILE = 'game_state.json'
+INITAL_GAME_STATE = {
+    "players": [],
+    "sceneAndMoves": []
+}
 
 
 # Load game state from a JSON file
@@ -15,11 +19,7 @@ def load_game_state():
     if os.path.exists(GAME_STATE_FILE):
         with open(GAME_STATE_FILE, 'r') as file:
             return json.load(file)
-    return {
-        "players": [],
-        "currentSceneDescription": "",
-        "currentMoves": []
-    }
+    return INITAL_GAME_STATE
 
 
 # Save game state to a JSON file
@@ -41,11 +41,7 @@ def update_game_state():
 
 @app.route('/gamestate/reset', methods=['POST'])
 def reset_game_state():
-    initial_state = {
-        "players": [],
-        "currentSceneDescription": "",
-        "currentMoves": []
-    }
+    initial_state = INITAL_GAME_STATE
     save_game_state(initial_state)
     return jsonify(initial_state)
 

@@ -31,18 +31,25 @@ class Player {
       };
 }
 
-class Challenge {
+class Scene {
+  final String title;
   final String description;
-  final int points;
 
-  Challenge(this.description, this.points);
+  Scene(this.title, this.description);
+
+  factory Scene.fromJson(Map<String, dynamic> json) {
+    return Scene(json['title'], json['description']);
+  }
+
+  Map<String, dynamic> toJson() => {
+        'title': title,
+        'description': description,
+      };
 }
 
 class GameState with ChangeNotifier {
   List<Player> players = [];
-  String currentSceneDescription = '';
-  List<String> currentMoves = [];
-  List<Challenge> challenges = [];
+  List<dynamic> sceneAndMoves = [];
   Player? selectedPlayer;
 
   static const String backendUrl = 'http://127.0.0.1:5000/gamestate';
@@ -55,13 +62,17 @@ class GameState with ChangeNotifier {
     final response = await http.get(Uri.parse(backendUrl));
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
+      print('Fetched data: $data'); // Debugging: print fetched data
       players = (data['players'] as List)
           .map((player) => Player.fromJson(player))
           .toList();
-      currentSceneDescription = data['currentSceneDescription'];
-      currentMoves = List<String>.from(data['currentMoves']);
-      notifyListeners();
-
+      sceneAndMoves = List<dynamic>.from(data['sceneAndMoves'].map((item) {
+        if (item['title'] != null) {
+          return Scene.fromJson(item);
+        } else {
+          return item; // it's a move (String)
+        }
+      }));
       // Ensure there is a narrator
       final narrator =
           players.firstWhere((player) => player.role == 'Narrator', orElse: () {
@@ -69,9 +80,10 @@ class GameState with ChangeNotifier {
         players.add(newNarrator);
         return newNarrator;
       });
-
       // Select the narrator by default
       selectPlayer(narrator);
+
+      notifyListeners();
     } else {
       throw Exception('Failed to load game state');
     }
@@ -83,14 +95,19 @@ class GameState with ChangeNotifier {
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'players': players.map((player) => player.toJson()).toList(),
-        'currentSceneDescription': currentSceneDescription,
-        'currentMoves': currentMoves,
+        'sceneAndMoves': sceneAndMoves.map((item) {
+          if (item is Scene) {
+            return item.toJson();
+          } else {
+            return item; // it's a move (String)
+          }
+        }).toList(),
       }),
     );
     if (response.statusCode != 200) {
       throw Exception('Failed to update game state');
     }
-    notifyListeners(); // Ensure UI update
+    notifyListeners();
   }
 
   void selectPlayer(Player player) {
@@ -104,13 +121,18 @@ class GameState with ChangeNotifier {
   }
 
   void makeMove(String move) {
-    currentMoves.add(move);
+    sceneAndMoves.add(move);
     updateGameState();
     notifyListeners();
   }
 
   bool canMakeMove() {
-    // Logic to determine if a move can be made
     return true;
+  }
+
+  void createScene(Scene scene) {
+    sceneAndMoves.add(scene);
+    updateGameState();
+    notifyListeners();
   }
 }

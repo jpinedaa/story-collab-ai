@@ -17,12 +17,15 @@ class MoveEditorPageState extends State<MoveEditorPage> {
   Move _move = Move('');
   final List<CardModel> _selectedCards = [];
   final List<CardModel> _selectedSceneCards = [];
+  List<int> _selectedCardsIndices = [];
+  String _description = '';
 
   @override
   void initState() {
     super.initState();
     if (widget.move != null) {
       _move = widget.move!;
+      _selectedCardsIndices = _move.selectedCardsIndices;
     }
   }
 
@@ -42,8 +45,13 @@ class MoveEditorPageState extends State<MoveEditorPage> {
       );
     }
 
-    final allCards =
-        player.cardsIndices.map((ind) => gameState.cards[ind]).toList();
+    final allCards = player.cardsIndices
+        .map((ind) => gameState.cards[ind])
+        .toList()
+        .map((playCard) {
+      String label = playCard.type.name;
+      return SelectableCard(playCard, label);
+    });
     final bool hasCards = allCards.isNotEmpty;
     final sceneCards = gameState.sceneAndMoves
         .whereType<SceneComponent>()
@@ -145,18 +153,48 @@ class MoveEditorPageState extends State<MoveEditorPage> {
                   child: ListView(
                     shrinkWrap: true,
                     children: allCards.map((card) {
-                      return CheckboxListTile(
-                        title: Text(card.title),
-                        value: _selectedCards.contains(card),
-                        onChanged: (bool? value) {
-                          setState(() {
-                            if (value == true) {
-                              _selectedCards.add(card);
-                            } else {
-                              _selectedCards.remove(card);
-                            }
-                          });
-                        },
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Text(
+                                  card.card.title,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    card.card.description,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(card.label),
+                          Checkbox(
+                            value: _selectedCardsIndices
+                                .map((ind) => gameState.cards[ind])
+                                .toList()
+                                .contains(card.card),
+                            onChanged: (bool? value) {
+                              setState(() {
+                                if (value == true) {
+                                  _selectedCardsIndices
+                                      .add(gameState.cards.indexOf(card.card));
+                                } else {
+                                  _selectedCardsIndices.remove(
+                                      gameState.cards.indexOf(card.card));
+                                }
+                              });
+                            },
+                          ),
+                        ],
                       );
                     }).toList(),
                   ),
@@ -179,7 +217,7 @@ class MoveEditorPageState extends State<MoveEditorPage> {
                     return null;
                   },
                   onSaved: (value) {
-                    _move = Move(value ?? '');
+                    _description = value ?? '';
                   },
                 ),
               ),
@@ -191,6 +229,8 @@ class MoveEditorPageState extends State<MoveEditorPage> {
                       ? () {
                           if (_formKey.currentState?.validate() ?? false) {
                             _formKey.currentState?.save();
+                            _move = Move(_description,
+                                selectedCardsIndices: _selectedCardsIndices);
                             if (widget.move == null) {
                               gameState.makeMove(_move);
                             } else {

@@ -9,7 +9,7 @@ class BaseContainer extends StatelessWidget {
   final bool isCentered;
   final Widget? child;
   final CardModel? placeCard;
-  final List<CardModel> selectedCards; // Add this line
+  final List<CardModel> selectedCards;
   final VoidCallback? onDelete;
 
   const BaseContainer({

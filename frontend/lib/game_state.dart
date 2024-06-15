@@ -42,7 +42,7 @@ class SceneComponent {
 
   factory SceneComponent.fromJson(Map<String, dynamic> json) {
     return SceneComponent(json['title'], json['description'],
-        placeCardIndex: json['placeCardIndex'] as int,
+        placeCardIndex: json['placeCardIndex'] as int?,
         selectedCardsIndices: (json['selectedCardsIndices'] as List<dynamic>)
             .map((e) => e as int)
             .toList());

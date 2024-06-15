@@ -5,6 +5,7 @@ import 'game_state.dart';
 import 'scene_display_page.dart';
 import 'move_editor_page.dart';
 import 'base_container.dart';
+import 'card_state.dart';
 import 'package:http/http.dart' as http;
 
 class GameRoomPage extends StatelessWidget {
@@ -114,7 +115,7 @@ class GameRoomPage extends StatelessWidget {
                 ),
                 IconButton(
                   icon: const Icon(Icons.add_circle_outline,
-                      color: Colors.blue, size: 30.0),
+                      color: Colors.blue, size: 45.0),
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -125,7 +126,7 @@ class GameRoomPage extends StatelessWidget {
                 ),
                 IconButton(
                   icon:
-                      const Icon(Icons.refresh, color: Colors.red, size: 30.0),
+                      const Icon(Icons.refresh, color: Colors.red, size: 45.0),
                   onPressed: () async {
                     await resetGameState();
                     gameState.fetchGameState();
@@ -170,6 +171,10 @@ class GameRoomPage extends StatelessWidget {
                       return BaseContainer(
                         title: 'Move',
                         content: item.description,
+                        selectedCards: item.selectedCardsIndices
+                            .map((ind) => gameState.cards[ind])
+                            .toList()
+                            .cast<CardModel>(),
                         child: IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
                           onPressed: () {

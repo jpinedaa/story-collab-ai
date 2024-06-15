@@ -105,10 +105,6 @@ class NewCardFormPageState extends State<NewCardFormPage> {
             CardType.Place,
             CardType.Character,
             CardType.Obstacle,
-            CardType.Nature,
-            CardType.Strength,
-            CardType.Weakness,
-            CardType.Subplot,
             CardType.Asset,
             CardType.Goal,
           ]

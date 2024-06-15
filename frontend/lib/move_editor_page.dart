@@ -15,7 +15,6 @@ class MoveEditorPage extends StatefulWidget {
 class MoveEditorPageState extends State<MoveEditorPage> {
   final _formKey = GlobalKey<FormState>();
   Move _move = Move('');
-  final List<CardModel> _selectedCards = [];
   final List<CardModel> _selectedSceneCards = [];
   List<int> _selectedCardsIndices = [];
   String _description = '';

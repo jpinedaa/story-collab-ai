@@ -7,6 +7,8 @@ import 'move_editor_page.dart';
 import 'base_container.dart';
 import 'card_state.dart';
 import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'card_detail_dialog.dart';
 
 class GameRoomPage extends StatelessWidget {
   const GameRoomPage({super.key});
@@ -15,6 +17,41 @@ class GameRoomPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final gameState = Provider.of<GameState>(context);
     final player = gameState.selectedPlayer;
+    bool isHovered = false;
+    Timer? timer;
+
+    void showCard(card) {
+      showGeneralDialog(
+        context: context,
+        barrierDismissible: true,
+        barrierLabel:
+            MaterialLocalizations.of(context).modalBarrierDismissLabel,
+        barrierColor: Colors.black54,
+        transitionDuration: const Duration(milliseconds: 100),
+        pageBuilder: (BuildContext buildContext, Animation animation,
+            Animation secondaryAnimation) {
+          return CardDetailDialog(
+              card: card, showEditDelete: false); // Add showEditDelete: false
+        },
+      );
+    }
+
+    void onHoverEnter(card) {
+      if (card == null) {
+        return;
+      }
+      isHovered = true;
+      timer = Timer(const Duration(milliseconds: 1200), () {
+        if (isHovered) {
+          showCard(card);
+        }
+      });
+    }
+
+    void onHoverExit() {
+      isHovered = false;
+      timer?.cancel();
+    }
 
     return Scaffold(
       body: Column(
@@ -41,73 +78,82 @@ class GameRoomPage extends StatelessWidget {
                           onTap: () {
                             gameState.selectPlayer(player);
                           },
-                          child: Container(
-                            width: 120,
-                            margin: const EdgeInsets.all(8.0),
-                            padding: const EdgeInsets.all(8.0),
-                            decoration: BoxDecoration(
-                              color:
-                                  isSelected ? Colors.blueAccent : Colors.white,
-                              borderRadius: BorderRadius.circular(8.0),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.5),
-                                  spreadRadius: 2,
-                                  blurRadius: 5,
-                                  offset: const Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  player.name,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: isSelected
-                                        ? Colors.white
-                                        : Colors.black,
-                                  ),
-                                ),
-                                if (player.cardIndex != null &&
-                                    gameState.cards[player.cardIndex!]
-                                            .imageBytes !=
-                                        null) ...[
-                                  Container(
-                                    margin: const EdgeInsets.symmetric(
-                                        horizontal: 8.0),
-                                    height: 80,
-                                    width: double.infinity,
-                                    child: Align(
-                                      alignment: Alignment.center,
-                                      child: Image.memory(
-                                          gameState.cards[player.cardIndex!]
-                                              .imageBytes!,
-                                          fit: BoxFit.cover),
+                          child: MouseRegion(
+                              onEnter: (_) => onHoverEnter(
+                                  player.cardIndex != null
+                                      ? gameState.cards[player.cardIndex!]
+                                      : null),
+                              onExit: (_) => onHoverExit(),
+                              child: Container(
+                                width: 120,
+                                margin: const EdgeInsets.all(8.0),
+                                padding: const EdgeInsets.all(8.0),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? Colors.blueAccent
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(8.0),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.5),
+                                      spreadRadius: 2,
+                                      blurRadius: 5,
+                                      offset: const Offset(0, 3),
                                     ),
-                                  ),
-                                  const SizedBox(height: 8.0),
-                                ],
-                                Text(
-                                  player.role,
-                                  style: TextStyle(
-                                    color: isSelected
-                                        ? Colors.white
-                                        : Colors.black,
-                                  ),
+                                  ],
                                 ),
-                                Text(
-                                  player.status,
-                                  style: TextStyle(
-                                    color: isSelected
-                                        ? Colors.white
-                                        : Colors.black,
-                                  ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      player.name,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: isSelected
+                                            ? Colors.white
+                                            : Colors.black,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    if (player.cardIndex != null &&
+                                        gameState.cards[player.cardIndex!]
+                                                .imageBytes !=
+                                            null) ...[
+                                      Container(
+                                        margin: const EdgeInsets.symmetric(
+                                            horizontal: 8.0),
+                                        height: 80,
+                                        width: double.infinity,
+                                        child: Align(
+                                          alignment: Alignment.center,
+                                          child: Image.memory(
+                                              gameState.cards[player.cardIndex!]
+                                                  .imageBytes!,
+                                              fit: BoxFit.cover),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 8.0),
+                                    ],
+                                    Text(
+                                      player.role,
+                                      style: TextStyle(
+                                        color: isSelected
+                                            ? Colors.white
+                                            : Colors.black,
+                                      ),
+                                    ),
+                                    Text(
+                                      player.status,
+                                      style: TextStyle(
+                                        color: isSelected
+                                            ? Colors.white
+                                            : Colors.black,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                          ),
+                              )),
                         );
                       },
                     ),

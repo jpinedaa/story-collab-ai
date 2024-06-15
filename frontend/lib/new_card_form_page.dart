@@ -31,6 +31,7 @@ class NewCardFormPageState extends State<NewCardFormPage> {
   String _title = '';
   String? _selectedPlayerStatus;
   Uint8List? _imageBytes;
+  bool _isCompressing = false;
 
   @override
   void initState() {
@@ -51,11 +52,19 @@ class NewCardFormPageState extends State<NewCardFormPage> {
     if (pickedFile != null) {
       final bytes = await pickedFile.readAsBytes();
 
+      setState(() {
+        _isCompressing = true;
+      });
+
+      // Allow UI to update
+      await Future.delayed(const Duration(milliseconds: 100));
+
       // Compress the image
       final compressedBytes = await compressImage(bytes);
 
       setState(() {
         _imageBytes = compressedBytes;
+        _isCompressing = false;
       });
     }
   }
@@ -189,7 +198,7 @@ class NewCardFormPageState extends State<NewCardFormPage> {
                       children: [
                         Expanded(
                           flex: 7,
-                          child: Container(
+                          child: SizedBox(
                             height: availableHeight,
                             child: TextFormField(
                               initialValue: _description,
@@ -228,13 +237,18 @@ class NewCardFormPageState extends State<NewCardFormPage> {
                                 height: availableHeight,
                                 width: double.infinity,
                                 child: Center(
-                                  child: _imageBytes == null
-                                      ? ElevatedButton(
-                                          onPressed: _pickImage,
-                                          child: const Text('Pick Image'),
-                                        )
-                                      : Image.memory(_imageBytes!,
-                                          fit: BoxFit.cover),
+                                  child: _isCompressing
+                                      ? const Text('Compressing Image...',
+                                          style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold))
+                                      : _imageBytes == null
+                                          ? ElevatedButton(
+                                              onPressed: _pickImage,
+                                              child: const Text('Pick Image'),
+                                            )
+                                          : Image.memory(_imageBytes!,
+                                              fit: BoxFit.cover),
                                 ),
                               ),
                             ],

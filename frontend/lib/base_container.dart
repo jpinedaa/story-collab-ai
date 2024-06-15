@@ -84,7 +84,7 @@ class BaseContainer extends StatelessWidget {
                                 card.type == CardType.Character) {
                               label = 'Challenge';
                             } else {
-                              label = 'Pickup';
+                              label = 'Pickup - ${card.type.name}';
                             }
                             return Container(
                               margin:

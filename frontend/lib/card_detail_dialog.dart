@@ -110,6 +110,20 @@ class CardDetailDialog extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 16.0),
+                          if (card.imageBytes != null) ...[
+                            Container(
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              height: 300,
+                              width: double.infinity,
+                              child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Image.memory(card.imageBytes!,
+                                    fit: BoxFit.cover),
+                              ),
+                            ),
+                            const SizedBox(height: 8.0),
+                          ],
                           SelectableText(
                             card.description,
                             style: const TextStyle(

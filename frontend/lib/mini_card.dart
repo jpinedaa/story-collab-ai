@@ -27,7 +27,7 @@ class MiniCard extends StatelessWidget {
       },
       child: Container(
         width: 200, // Set a fixed width
-        height: 120, // Set a fixed height
+        height: 180, // Set a fixed height
         padding: const EdgeInsets.all(8.0),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -54,6 +54,18 @@ class MiniCard extends StatelessWidget {
               maxLines: 1,
             ),
             const SizedBox(height: 4.0),
+            if (card.imageBytes != null) ...[
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                height: 100,
+                width: double.infinity,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Image.memory(card.imageBytes!, fit: BoxFit.cover),
+                ),
+              ),
+              const SizedBox(height: 8.0),
+            ],
             Text(
               card.description,
               style: const TextStyle(fontSize: 12.0),

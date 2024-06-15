@@ -56,14 +56,15 @@ class SceneDisplayPageState extends State<SceneDisplayPage> {
     final selectableCards = player.cardsIndices
         .map((ind) => gameState.cards[ind])
         .toList()
-        .where((card) =>
-            card.type != CardType.Character ||
-            card.playerStatus == PlayerStatus.NPC)
+        .where((card) => (card.playerStatus == PlayerStatus.NPC ||
+            card.type == CardType.Obstacle ||
+            card.type == CardType.Asset ||
+            card.type == CardType.Goal))
         .map((card) {
       String label =
           (card.type == CardType.Obstacle || card.type == CardType.Character)
               ? 'Challenge'
-              : 'Pickup';
+              : 'Pickup - ${card.type.name}';
       return SelectableCard(card, label);
     }).toList();
 

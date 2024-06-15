@@ -196,8 +196,8 @@ Widget buildCard(CardModel card, BuildContext context) {
       );
     },
     child: Container(
-      width: 200,
-      height: 150, // Set a fixed height for all cards
+      width: 300,
+      height: 250, // Set a fixed height for all cards
       margin: const EdgeInsets.all(8.0),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
@@ -231,11 +231,11 @@ Widget buildCard(CardModel card, BuildContext context) {
             const SizedBox(height: 8.0),
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 8.0),
-              height: 50,
+              height: 100,
               width: double.infinity,
-              child: Center(
-                child: Image.memory(card.imageBytes!, fit: BoxFit.cover),
-              ),
+              child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Image.memory(card.imageBytes!, fit: BoxFit.cover)),
             )
           ],
           const SizedBox(height: 8.0),

@@ -41,6 +41,7 @@ class NewCardFormPageState extends State<NewCardFormPage> {
       _description = widget.card!.description;
       _selectedCardType = widget.card!.type.toString();
       _selectedPlayerStatus = widget.card!.playerStatus?.toString();
+      _imageBytes = widget.card!.imageBytes;
     } else if (widget.preselectedCardType != null) {
       _selectedCardType = widget.preselectedCardType.toString();
     }
@@ -75,7 +76,7 @@ class NewCardFormPageState extends State<NewCardFormPage> {
       filePath: '', // optional: file path can be empty for web
     );
     const config = Configuration(
-      jpgQuality: 5,
+      jpgQuality: 1,
     );
     final imgconfig = ImageFileConfiguration(input: input, config: config);
 

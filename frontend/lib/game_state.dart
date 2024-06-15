@@ -7,61 +7,67 @@ class Player {
   final String name;
   final String role;
   String status;
-  List<CardModel> cards;
+  List<int> cardsIndices;
 
-  Player(this.name, this.role, this.status, {List<CardModel>? cards})
-      : cards = cards ?? [];
+  Player(this.name, this.role, this.status, {List<int>? cardsIndices})
+      : cardsIndices = cardsIndices ?? [];
 
   factory Player.fromJson(Map<String, dynamic> json) {
-    return Player(
-      json['name'],
-      json['role'],
-      json['status'],
-      cards: (json['cards'] as List<dynamic>?)
-          ?.map((card) => CardModel.fromJson(card))
-          .toList(),
-    );
+    return Player(json['name'], json['role'], json['status'],
+        cardsIndices: (json['cardsIndices'] as List<dynamic>)
+            .map((e) => e as int)
+            .toList());
   }
 
   Map<String, dynamic> toJson() => {
         'name': name,
         'role': role,
         'status': status,
-        'cards': cards.map((card) => card.toJson()).toList(),
+        'cardsIndices': cardsIndices,
       };
 }
 
 class SceneComponent {
   final String title;
   final String description;
-  final CardModel? placeCard;
-  final List<CardModel> selectedCards; // Add this line
+  final int? placeCardIndex;
+  final List<int> selectedCardsIndices;
 
   SceneComponent(this.title, this.description,
-      {this.placeCard,
-      this.selectedCards = const []}); // Update the constructor
+      {this.placeCardIndex, this.selectedCardsIndices = const []});
 
   factory SceneComponent.fromJson(Map<String, dynamic> json) {
-    return SceneComponent(
-      json['title'],
-      json['description'],
-      placeCard: json['placeCard'] != null
-          ? CardModel.fromJson(json['placeCard'])
-          : null, // Add this line
-      selectedCards: (json['selectedCards'] as List<dynamic>?)
-              ?.map((card) => CardModel.fromJson(card))
-              .toList() ??
-          [], // Add this line
-    );
+    return SceneComponent(json['title'], json['description'],
+        placeCardIndex: json['placeCardIndex'] as int,
+        selectedCardsIndices: (json['selectedCardsIndices'] as List<dynamic>)
+            .map((e) => e as int)
+            .toList());
   }
 
   Map<String, dynamic> toJson() => {
         'title': title,
         'description': description,
-        'placeCard': placeCard?.toJson(), // Add this line
-        'selectedCards': selectedCards
-            .map((card) => card.toJson())
-            .toList(), // Add this line
+        'placeCardIndex': placeCardIndex,
+        'selectedCardsIndices': selectedCardsIndices,
+      };
+}
+
+class Move {
+  final String description;
+  final List<int> selectedCardsIndices;
+
+  Move(this.description, {this.selectedCardsIndices = const []});
+
+  factory Move.fromJson(Map<String, dynamic> json) {
+    return Move(json['description'],
+        selectedCardsIndices: (json['selectedCardsIndices'] as List<dynamic>)
+            .map((e) => e as int)
+            .toList());
+  }
+
+  Map<String, dynamic> toJson() => {
+        'description': description,
+        'selectedCardsIndices': selectedCardsIndices
       };
 }
 
@@ -69,6 +75,7 @@ class GameState with ChangeNotifier {
   List<Player> players = [];
   List<dynamic> sceneAndMoves = [];
   Player? selectedPlayer;
+  List<CardModel> cards = [];
 
   static const String backendUrl = 'http://127.0.0.1:5000/gamestate';
 
@@ -87,9 +94,12 @@ class GameState with ChangeNotifier {
         if (item['title'] != null) {
           return SceneComponent.fromJson(item);
         } else {
-          return item; // it's a move (String)
+          return Move.fromJson(item); // it's a move
         }
       }));
+      cards = (data['cards'] as List)
+          .map((card) => CardModel.fromJson(card))
+          .toList();
       // Ensure there is a narrator
       final narrator =
           players.firstWhere((player) => player.role == 'Narrator', orElse: () {
@@ -116,9 +126,10 @@ class GameState with ChangeNotifier {
           if (item is SceneComponent) {
             return item.toJson();
           } else {
-            return item; // it's a move (String)
+            return item.toJson(); // it's a move
           }
         }).toList(),
+        'cards': cards.map((card) => card.toJson()).toList(),
       }),
     );
     if (response.statusCode != 200) {
@@ -134,10 +145,11 @@ class GameState with ChangeNotifier {
 
   void addPlayer(Player player) {
     players.add(player);
+    updateGameState();
     notifyListeners();
   }
 
-  void makeMove(String move) {
+  void makeMove(Move move) {
     sceneAndMoves.add(move);
     updateGameState();
     notifyListeners();
@@ -169,12 +181,58 @@ class GameState with ChangeNotifier {
     notifyListeners();
   }
 
-  void updateMove(String oldMove, String newMove) {
+  void updateMove(Move oldMove, Move newMove) {
     final index = sceneAndMoves.indexOf(oldMove);
     if (index != -1) {
       sceneAndMoves[index] = newMove;
       updateGameState();
       notifyListeners();
     }
+  }
+
+  List<CardModel> getCardsByType(CardType type) {
+    return cards.where((card) => card.type == type).toList();
+  }
+
+  void addCard(CardModel card) {
+    cards.add(card);
+    updateGameState();
+    notifyListeners();
+  }
+
+  void updateCard(CardModel oldCard, CardModel newCard) {
+    final index = cards.indexOf(oldCard);
+    if (index != -1) {
+      cards[index] = newCard;
+      updateGameState();
+      notifyListeners();
+    }
+  }
+
+  void removeCard(CardModel card) {
+    int cardIndex = cards.indexOf(card);
+    cards.remove(card);
+    // Remove the card from all players
+    for (final player in players) {
+      player.cardsIndices.remove(cardIndex);
+    }
+    // Throw exception if the card is used in a scene or move
+    for (final sceneOrMove in sceneAndMoves) {
+      if (sceneOrMove is SceneComponent) {
+        if (sceneOrMove.placeCardIndex == cardIndex) {
+          throw Exception('Cannot delete card used in a scene');
+        }
+        if (sceneOrMove.selectedCardsIndices.contains(cardIndex)) {
+          throw Exception('Cannot delete card used in a scene');
+        }
+      }
+      if (sceneOrMove is Move) {
+        if (sceneOrMove.selectedCardsIndices.contains(cardIndex)) {
+          throw Exception('Cannot delete card used in a move');
+        }
+      }
+    }
+    updateGameState();
+    notifyListeners();
   }
 }

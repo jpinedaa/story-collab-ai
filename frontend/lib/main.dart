@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'game_state.dart';
 import 'game_room_page.dart';
-import 'card_state.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,10 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => GameState()),
-        ChangeNotifierProvider(create: (context) => CardState()),
-      ],
+      providers: [ChangeNotifierProvider(create: (context) => GameState())],
       child: MaterialApp(
         title: 'Narravive',
         theme: ThemeData(

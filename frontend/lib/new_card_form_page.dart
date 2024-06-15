@@ -4,6 +4,9 @@ import 'card_state.dart';
 import 'game_state.dart';
 import 'card_creation_page.dart';
 import 'scene_display_page.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:typed_data';
+import 'package:image_compression/image_compression.dart';
 
 class NewCardFormPage extends StatefulWidget {
   final CardModel? card;
@@ -27,6 +30,7 @@ class NewCardFormPageState extends State<NewCardFormPage> {
   String _description = '';
   String _title = '';
   String? _selectedPlayerStatus;
+  Uint8List? _imageBytes;
 
   @override
   void initState() {
@@ -41,11 +45,39 @@ class NewCardFormPageState extends State<NewCardFormPage> {
     }
   }
 
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      final bytes = await pickedFile.readAsBytes();
+
+      // Compress the image
+      final compressedBytes = await compressImage(bytes);
+
+      setState(() {
+        _imageBytes = compressedBytes;
+      });
+    }
+  }
+
+  Future<Uint8List> compressImage(Uint8List bytes) async {
+    final input = ImageFile(
+      rawBytes: bytes,
+      filePath: '', // optional: file path can be empty for web
+    );
+    const config = Configuration(
+      jpgQuality: 5,
+    );
+    final imgconfig = ImageFileConfiguration(input: input, config: config);
+
+    final compressedFile = await compressInQueue(imgconfig);
+    return compressedFile.rawBytes;
+  }
+
   @override
   Widget build(BuildContext context) {
     final gameState = Provider.of<GameState>(context);
     final player = gameState.selectedPlayer;
-    final cardState = Provider.of<CardState>(context);
 
     if (player == null) {
       return Scaffold(
@@ -149,22 +181,67 @@ class NewCardFormPageState extends State<NewCardFormPage> {
                   },
                 ),
               Expanded(
-                child: TextFormField(
-                  initialValue: _description,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
-                    alignLabelWithHint: true,
-                  ),
-                  maxLines: null,
-                  expands: true,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a description';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    _description = value ?? '';
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    double availableHeight = constraints.maxHeight -
+                        6; // Adjust this value as needed
+                    return Row(
+                      children: [
+                        Expanded(
+                          flex: 7,
+                          child: Container(
+                            height: availableHeight,
+                            child: TextFormField(
+                              initialValue: _description,
+                              decoration: const InputDecoration(
+                                labelText: 'Description',
+                                alignLabelWithHint: true,
+                              ),
+                              maxLines: null,
+                              expands: true,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter a description';
+                                }
+                                return null;
+                              },
+                              onSaved: (value) {
+                                _description = value ?? '';
+                              },
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                            width: 16), // Add some space between the widgets
+                        Expanded(
+                          flex: 3,
+                          child: Column(
+                            children: [
+                              Container(
+                                margin:
+                                    const EdgeInsets.symmetric(horizontal: 8.0),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey),
+                                  borderRadius: BorderRadius.circular(4.0),
+                                  color: Colors.grey[200],
+                                ),
+                                height: availableHeight,
+                                width: double.infinity,
+                                child: Center(
+                                  child: _imageBytes == null
+                                      ? ElevatedButton(
+                                          onPressed: _pickImage,
+                                          child: const Text('Pick Image'),
+                                        )
+                                      : Image.memory(_imageBytes!,
+                                          fit: BoxFit.cover),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    );
                   },
                 ),
               ),
@@ -186,9 +263,12 @@ class NewCardFormPageState extends State<NewCardFormPage> {
                                   (e) => e.toString() == _selectedPlayerStatus,
                                 )
                               : null,
+                      imageBytes: _imageBytes,
                     );
                     if (widget.card == null) {
-                      player.cards = List.from(player.cards)..add(newCard);
+                      gameState.addCard(newCard);
+                      player.cardsIndices = List.from(player.cardsIndices)
+                        ..add(gameState.cards.indexOf(newCard));
                       if (newCard.type == CardType.Character) {
                         final newPlayer = Player(
                             newCard.title,
@@ -197,10 +277,8 @@ class NewCardFormPageState extends State<NewCardFormPage> {
                                 'Manual');
                         gameState.addPlayer(newPlayer);
                       }
-                      cardState.addCard(newCard);
                     } else {
-                      final index = player.cards.indexOf(widget.card!);
-                      player.cards[index] = newCard;
+                      gameState.updateCard(widget.card!, newCard);
                     }
                     gameState.updateGameState().then((_) {
                       if (widget.fromSceneEditor) {

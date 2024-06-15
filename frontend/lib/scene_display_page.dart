@@ -17,8 +17,8 @@ class SceneDisplayPageState extends State<SceneDisplayPage> {
   final _formKey = GlobalKey<FormState>();
   String _title = '';
   String _description = '';
-  CardModel? _selectedPlaceCard;
-  final List<CardModel> _selectedChallenges = [];
+  int? _selectedPlaceCardIndex;
+  final List<int> _selectedChallengesIndices = [];
 
   @override
   void initState() {
@@ -26,8 +26,9 @@ class SceneDisplayPageState extends State<SceneDisplayPage> {
     if (widget.sceneComponent != null) {
       _title = widget.sceneComponent!.title;
       _description = widget.sceneComponent!.description;
-      _selectedPlaceCard = widget.sceneComponent!.placeCard;
-      _selectedChallenges.addAll(widget.sceneComponent!.selectedCards);
+      _selectedPlaceCardIndex = widget.sceneComponent!.placeCardIndex;
+      _selectedChallengesIndices
+          .addAll(widget.sceneComponent!.selectedCardsIndices);
     }
   }
 
@@ -47,9 +48,14 @@ class SceneDisplayPageState extends State<SceneDisplayPage> {
       );
     }
 
-    final placeCards =
-        player.cards.where((card) => card.type == CardType.Place).toList();
-    final selectableCards = player.cards
+    final placeCards = player.cardsIndices
+        .map((ind) => gameState.cards[ind])
+        .toList()
+        .where((card) => card.type == CardType.Place)
+        .toList();
+    final selectableCards = player.cardsIndices
+        .map((ind) => gameState.cards[ind])
+        .toList()
         .where((card) =>
             card.type != CardType.Character ||
             card.playerStatus == PlayerStatus.NPC)
@@ -110,7 +116,9 @@ class SceneDisplayPageState extends State<SceneDisplayPage> {
                 )
               else
                 DropdownButtonFormField<CardModel>(
-                  value: _selectedPlaceCard,
+                  value: _selectedPlaceCardIndex != null
+                      ? gameState.cards[_selectedPlaceCardIndex!]
+                      : null,
                   decoration: const InputDecoration(labelText: 'Place Card'),
                   items: placeCards
                       .map((card) => DropdownMenuItem<CardModel>(
@@ -120,7 +128,8 @@ class SceneDisplayPageState extends State<SceneDisplayPage> {
                       .toList(),
                   onChanged: (value) {
                     setState(() {
-                      _selectedPlaceCard = value;
+                      _selectedPlaceCardIndex =
+                          value != null ? gameState.cards.indexOf(value) : null;
                     });
                   },
                 ),
@@ -183,15 +192,19 @@ class SceneDisplayPageState extends State<SceneDisplayPage> {
                           const SizedBox(width: 10),
                           Text(selectableCard.label),
                           Checkbox(
-                            value: _selectedChallenges
+                            value: _selectedChallengesIndices
+                                .map((ind) => gameState.cards[ind])
+                                .toList()
                                 .contains(selectableCard.card),
                             onChanged: (bool? value) {
                               setState(() {
                                 if (value == true) {
-                                  _selectedChallenges.add(selectableCard.card);
+                                  _selectedChallengesIndices.add(gameState.cards
+                                      .indexOf(selectableCard.card));
                                 } else {
-                                  _selectedChallenges
-                                      .remove(selectableCard.card);
+                                  _selectedChallengesIndices.remove(gameState
+                                      .cards
+                                      .indexOf(selectableCard.card));
                                 }
                               });
                             },
@@ -233,8 +246,8 @@ class SceneDisplayPageState extends State<SceneDisplayPage> {
                       final newSceneComponent = SceneComponent(
                         _title,
                         _description,
-                        placeCard: _selectedPlaceCard,
-                        selectedCards: _selectedChallenges,
+                        placeCardIndex: _selectedPlaceCardIndex,
+                        selectedCardsIndices: _selectedChallengesIndices,
                       );
                       if (widget.sceneComponent == null) {
                         gameState.createSceneComponent(newSceneComponent);

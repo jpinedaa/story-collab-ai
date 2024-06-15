@@ -17,8 +17,32 @@ class CardDetailDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardState = Provider.of<CardState>(context, listen: false);
     final gameState = Provider.of<GameState>(context, listen: false);
+    // Check if the card has been used
+    bool isCardUsed = false;
+    for (final moveOrScenecomponent in gameState.sceneAndMoves) {
+      if (moveOrScenecomponent is Move) {
+        if (moveOrScenecomponent.selectedCardsIndices
+            .map((ind) => gameState.cards[ind])
+            .toList()
+            .contains(card)) {
+          isCardUsed = true;
+          break;
+        }
+      }
+      if (moveOrScenecomponent is SceneComponent) {
+        if (moveOrScenecomponent.selectedCardsIndices
+                .map((ind) => gameState.cards[ind])
+                .toList()
+                .contains(card) ||
+            (moveOrScenecomponent.placeCardIndex != null &&
+                gameState.cards[moveOrScenecomponent.placeCardIndex!] ==
+                    card)) {
+          isCardUsed = true;
+          break;
+        }
+      }
+    }
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -100,36 +124,41 @@ class CardDetailDialog extends StatelessWidget {
                         ],
                       ),
                     ),
-                    if (showEditDelete) // Add this condition
+                    if (showEditDelete)
                       Positioned(
                         top: 8.0,
                         right: 8.0,
                         child: Row(
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.blue),
-                              onPressed: () {
-                                Navigator.pop(context); // Close the dialog
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        NewCardFormPage(card: card),
-                                  ),
-                                );
-                              },
+                              icon: Icon(Icons.edit,
+                                  color:
+                                      !isCardUsed ? Colors.blue : Colors.grey),
+                              onPressed: !isCardUsed
+                                  ? () {
+                                      Navigator.pop(
+                                          context); // Close the dialog
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              NewCardFormPage(card: card),
+                                        ),
+                                      );
+                                    }
+                                  : null,
                             ),
                             IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () {
-                                cardState.removeCard(card);
-                                final player = gameState.selectedPlayer;
-                                if (player != null) {
-                                  player.cards.remove(card);
-                                  gameState.updateGameState();
-                                }
-                                Navigator.pop(context); // Close the dialog
-                              },
+                              icon: Icon(Icons.delete,
+                                  color:
+                                      !isCardUsed ? Colors.red : Colors.grey),
+                              onPressed: !isCardUsed
+                                  ? () {
+                                      gameState.removeCard(card);
+                                      Navigator.pop(
+                                          context); // Close the dialog
+                                    }
+                                  : null,
                             ),
                           ],
                         ),

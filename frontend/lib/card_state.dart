@@ -1,24 +1,6 @@
 // ignore_for_file: constant_identifier_names
 
-import 'package:flutter/material.dart';
-
-class CardState with ChangeNotifier {
-  List<CardModel> cards = [];
-
-  void addCard(CardModel card) {
-    cards.add(card);
-    notifyListeners();
-  }
-
-  void removeCard(CardModel card) {
-    cards.remove(card);
-    notifyListeners();
-  }
-
-  List<CardModel> getCardsByType(CardType type) {
-    return cards.where((card) => card.type == type).toList();
-  }
-}
+import 'dart:typed_data';
 
 enum CardType {
   Place,
@@ -39,12 +21,14 @@ class CardModel {
   final String description;
   final CardType type;
   final PlayerStatus? playerStatus; // Added playerStatus field
+  final Uint8List? imageBytes;
 
   CardModel({
     required this.title,
     required this.description,
     required this.type,
-    this.playerStatus, // Initialize playerStatus field
+    this.playerStatus,
+    this.imageBytes,
   });
 
   // Convert to JSON for storage
@@ -53,10 +37,8 @@ class CardModel {
       'title': title,
       'description': description,
       'type': type.toString().split('.').last,
-      'playerStatus': playerStatus
-          ?.toString()
-          .split('.')
-          .last, // Convert playerStatus to JSON
+      'playerStatus': playerStatus?.toString().split('.').last,
+      'imageBytes': imageBytes
     };
   }
 
@@ -70,6 +52,9 @@ class CardModel {
       playerStatus: json['playerStatus'] != null
           ? PlayerStatus.values.firstWhere(
               (e) => e.toString() == 'PlayerStatus.${json['playerStatus']}')
+          : null,
+      imageBytes: json['imageBytes'] != null
+          ? Uint8List.fromList(List<int>.from(json['imageBytes']))
           : null,
     );
   }

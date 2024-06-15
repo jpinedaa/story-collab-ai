@@ -27,51 +27,81 @@ class CardCreationPage extends StatelessWidget {
 
     final cardCategories = player.role == 'Narrator'
         ? {
-            'Place': player.cards
+            'Place': player.cardsIndices
+                .map((ind) => gameState.cards[ind])
+                .toList()
                 .where((card) => card.type == CardType.Place)
                 .toList(),
-            'Character': player.cards
+            'Character': player.cardsIndices
+                .map((ind) => gameState.cards[ind])
+                .toList()
                 .where((card) => card.type == CardType.Character)
                 .toList(),
-            'Obstacle': player.cards
+            'Obstacle': player.cardsIndices
+                .map((ind) => gameState.cards[ind])
+                .toList()
                 .where((card) => card.type == CardType.Obstacle)
                 .toList(),
-            'Nature': player.cards
+            'Nature': player.cardsIndices
+                .map((ind) => gameState.cards[ind])
+                .toList()
                 .where((card) => card.type == CardType.Nature)
                 .toList(),
-            'Strength': player.cards
+            'Strength': player.cardsIndices
+                .map((ind) => gameState.cards[ind])
+                .toList()
                 .where((card) => card.type == CardType.Strength)
                 .toList(),
-            'Weakness': player.cards
+            'Weakness': player.cardsIndices
+                .map((ind) => gameState.cards[ind])
+                .toList()
                 .where((card) => card.type == CardType.Weakness)
                 .toList(),
-            'Subplot': player.cards
+            'Subplot': player.cardsIndices
+                .map((ind) => gameState.cards[ind])
+                .toList()
                 .where((card) => card.type == CardType.Subplot)
                 .toList(),
-            'Asset': player.cards
+            'Asset': player.cardsIndices
+                .map((ind) => gameState.cards[ind])
+                .toList()
                 .where((card) => card.type == CardType.Asset)
                 .toList(),
-            'Goal': player.cards
+            'Goal': player.cardsIndices
+                .map((ind) => gameState.cards[ind])
+                .toList()
                 .where((card) => card.type == CardType.Goal)
                 .toList(),
           }
         : {
-            'Nature': player.cards
+            'Nature': player.cardsIndices
+                .map((ind) => gameState.cards[ind])
+                .toList()
                 .where((card) => card.type == CardType.Nature)
                 .toList(),
-            'Strength': player.cards
+            'Strength': player.cardsIndices
+                .map((ind) => gameState.cards[ind])
+                .toList()
                 .where((card) => card.type == CardType.Strength)
                 .toList(),
-            'Weakness': player.cards
+            'Weakness': player.cardsIndices
+                .map((ind) => gameState.cards[ind])
+                .toList()
                 .where((card) => card.type == CardType.Weakness)
                 .toList(),
-            'Subplot': player.cards
+            'Subplot': player.cardsIndices
+                .map((ind) => gameState.cards[ind])
+                .toList()
                 .where((card) => card.type == CardType.Subplot)
                 .toList(),
-            'Asset': player.cards
+            'Asset': player.cardsIndices
+                .map((ind) => gameState.cards[ind])
+                .toList()
                 .where((card) => card.type == CardType.Asset)
                 .toList(),
-            'Goal': player.cards
+            'Goal': player.cardsIndices
+                .map((ind) => gameState.cards[ind])
+                .toList()
                 .where((card) => card.type == CardType.Goal)
                 .toList(),
           };
@@ -195,7 +225,19 @@ Widget buildCard(CardModel card, BuildContext context) {
                   TextDecoration.none, // Remove any underline decoration
             ),
             overflow: TextOverflow.ellipsis, // Truncate text if it doesn't fit
+            maxLines: 1,
           ),
+          if (card.imageBytes != null) ...[
+            const SizedBox(height: 8.0),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 8.0),
+              height: 50,
+              width: double.infinity,
+              child: Center(
+                child: Image.memory(card.imageBytes!, fit: BoxFit.cover),
+              ),
+            )
+          ],
           const SizedBox(height: 8.0),
           Expanded(
             child: Text(

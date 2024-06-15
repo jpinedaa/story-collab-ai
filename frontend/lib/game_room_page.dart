@@ -125,8 +125,12 @@ class GameRoomPage extends StatelessWidget {
                       return BaseContainer(
                         title: item.title,
                         content: item.description,
-                        placeCard: item.placeCard,
-                        selectedCards: item.selectedCards,
+                        placeCard: item.placeCardIndex != null
+                            ? gameState.cards[item.placeCardIndex!]
+                            : null,
+                        selectedCards: item.selectedCardsIndices
+                            .map((ind) => gameState.cards[ind])
+                            .toList(),
                         child: IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
                           onPressed: () {
@@ -146,7 +150,7 @@ class GameRoomPage extends StatelessWidget {
                     } else {
                       return BaseContainer(
                         title: 'Move',
-                        content: item,
+                        content: item.description,
                         child: IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
                           onPressed: () {

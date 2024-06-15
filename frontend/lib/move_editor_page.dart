@@ -4,7 +4,7 @@ import 'card_state.dart';
 import 'game_state.dart';
 
 class MoveEditorPage extends StatefulWidget {
-  final String? move;
+  final Move? move;
 
   const MoveEditorPage({super.key, this.move});
 
@@ -14,14 +14,15 @@ class MoveEditorPage extends StatefulWidget {
 
 class MoveEditorPageState extends State<MoveEditorPage> {
   final _formKey = GlobalKey<FormState>();
-  String _description = '';
-  final List<CardModel> _selectedChallenges = [];
+  Move _move = Move('');
+  final List<CardModel> _selectedCards = [];
+  final List<CardModel> _selectedSceneCards = [];
 
   @override
   void initState() {
     super.initState();
     if (widget.move != null) {
-      _description = widget.move!;
+      _move = widget.move!;
     }
   }
 
@@ -41,8 +42,23 @@ class MoveEditorPageState extends State<MoveEditorPage> {
       );
     }
 
-    final allCards = player.cards.toList();
+    final allCards =
+        player.cardsIndices.map((ind) => gameState.cards[ind]).toList();
     final bool hasCards = allCards.isNotEmpty;
+    final sceneCards = gameState.sceneAndMoves
+        .whereType<SceneComponent>()
+        .map((sceneComponent) => sceneComponent.selectedCardsIndices
+            .map((ind) => gameState.cards[ind]))
+        .expand((element) => element)
+        .toList()
+        .map((sceneCard) {
+      String label = (sceneCard.type == CardType.Obstacle ||
+              sceneCard.type == CardType.Character)
+          ? 'Challenge'
+          : 'Pickup';
+      return SelectableCard(sceneCard, label);
+    }).toList();
+    final bool hasSceneCards = sceneCards.isNotEmpty;
 
     return Scaffold(
       appBar: AppBar(
@@ -54,6 +70,64 @@ class MoveEditorPageState extends State<MoveEditorPage> {
           key: _formKey,
           child: Column(
             children: [
+              const SizedBox(height: 16.0),
+              const Text(
+                'Select Scene Cards',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              if (!hasSceneCards)
+                const Text(
+                  'No scene cards available.',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                )
+              else
+                ConstrainedBox(
+                  constraints: const BoxConstraints(
+                      maxHeight: 200), // Set a maximum height
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: sceneCards.map((sceneCard) {
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: Row(
+                              children: [
+                                Text(
+                                  sceneCard.card.title,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    sceneCard.card.description,
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 1,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          Text(sceneCard.label),
+                          Checkbox(
+                            value: _selectedSceneCards.contains(sceneCard.card),
+                            onChanged: (bool? value) {
+                              setState(() {
+                                if (value == true) {
+                                  _selectedSceneCards.add(sceneCard.card);
+                                } else {
+                                  _selectedSceneCards.remove(sceneCard.card);
+                                }
+                              });
+                            },
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ),
               const SizedBox(height: 16.0),
               const Text(
                 'Select Cards',
@@ -73,13 +147,13 @@ class MoveEditorPageState extends State<MoveEditorPage> {
                     children: allCards.map((card) {
                       return CheckboxListTile(
                         title: Text(card.title),
-                        value: _selectedChallenges.contains(card),
+                        value: _selectedCards.contains(card),
                         onChanged: (bool? value) {
                           setState(() {
                             if (value == true) {
-                              _selectedChallenges.add(card);
+                              _selectedCards.add(card);
                             } else {
-                              _selectedChallenges.remove(card);
+                              _selectedCards.remove(card);
                             }
                           });
                         },
@@ -90,7 +164,7 @@ class MoveEditorPageState extends State<MoveEditorPage> {
               const SizedBox(height: 16.0),
               Expanded(
                 child: TextFormField(
-                  initialValue: _description,
+                  initialValue: _move.description,
                   decoration: const InputDecoration(
                     labelText: 'Description',
                     alignLabelWithHint: true,
@@ -105,7 +179,7 @@ class MoveEditorPageState extends State<MoveEditorPage> {
                     return null;
                   },
                   onSaved: (value) {
-                    _description = value ?? '';
+                    _move = Move(value ?? '');
                   },
                 ),
               ),
@@ -118,9 +192,9 @@ class MoveEditorPageState extends State<MoveEditorPage> {
                           if (_formKey.currentState?.validate() ?? false) {
                             _formKey.currentState?.save();
                             if (widget.move == null) {
-                              gameState.makeMove(_description);
+                              gameState.makeMove(_move);
                             } else {
-                              gameState.updateMove(widget.move!, _description);
+                              gameState.updateMove(widget.move!, _move);
                             }
                             Navigator.pop(context); // Pop back to GameRoomPage
                           }

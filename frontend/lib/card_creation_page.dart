@@ -42,26 +42,6 @@ class CardCreationPage extends StatelessWidget {
                 .toList()
                 .where((card) => card.type == CardType.Obstacle)
                 .toList(),
-            'Nature': player.cardsIndices
-                .map((ind) => gameState.cards[ind])
-                .toList()
-                .where((card) => card.type == CardType.Nature)
-                .toList(),
-            'Strength': player.cardsIndices
-                .map((ind) => gameState.cards[ind])
-                .toList()
-                .where((card) => card.type == CardType.Strength)
-                .toList(),
-            'Weakness': player.cardsIndices
-                .map((ind) => gameState.cards[ind])
-                .toList()
-                .where((card) => card.type == CardType.Weakness)
-                .toList(),
-            'Subplot': player.cardsIndices
-                .map((ind) => gameState.cards[ind])
-                .toList()
-                .where((card) => card.type == CardType.Subplot)
-                .toList(),
             'Asset': player.cardsIndices
                 .map((ind) => gameState.cards[ind])
                 .toList()

@@ -289,7 +289,8 @@ class NewCardFormPageState extends State<NewCardFormPage> {
                             newCard.title,
                             'Character',
                             newCard.playerStatus?.toString().split('.').last ??
-                                'Manual');
+                                'Manual',
+                            cardIndex: gameState.cards.indexOf(newCard));
                         gameState.addPlayer(newPlayer);
                       }
                     } else {

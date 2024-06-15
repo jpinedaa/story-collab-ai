@@ -8,15 +8,18 @@ class Player {
   final String role;
   String status;
   List<int> cardsIndices;
+  int? cardIndex;
 
-  Player(this.name, this.role, this.status, {List<int>? cardsIndices})
+  Player(this.name, this.role, this.status,
+      {List<int>? cardsIndices, this.cardIndex})
       : cardsIndices = cardsIndices ?? [];
 
   factory Player.fromJson(Map<String, dynamic> json) {
     return Player(json['name'], json['role'], json['status'],
         cardsIndices: (json['cardsIndices'] as List<dynamic>)
             .map((e) => e as int)
-            .toList());
+            .toList(),
+        cardIndex: json['cardIndex'] as int?);
   }
 
   Map<String, dynamic> toJson() => {
@@ -24,6 +27,7 @@ class Player {
         'role': role,
         'status': status,
         'cardsIndices': cardsIndices,
+        'cardIndex': cardIndex
       };
 }
 

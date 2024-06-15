@@ -24,7 +24,7 @@ class GameRoomPage extends StatelessWidget {
               children: [
                 Expanded(
                   child: SizedBox(
-                    height: 100.0,
+                    height: 180.0,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: gameState.players
@@ -41,7 +41,7 @@ class GameRoomPage extends StatelessWidget {
                             gameState.selectPlayer(player);
                           },
                           child: Container(
-                            width: 100,
+                            width: 120,
                             margin: const EdgeInsets.all(8.0),
                             padding: const EdgeInsets.all(8.0),
                             decoration: BoxDecoration(
@@ -69,6 +69,25 @@ class GameRoomPage extends StatelessWidget {
                                         : Colors.black,
                                   ),
                                 ),
+                                if (player.cardIndex != null &&
+                                    gameState.cards[player.cardIndex!]
+                                            .imageBytes !=
+                                        null) ...[
+                                  Container(
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 8.0),
+                                    height: 80,
+                                    width: double.infinity,
+                                    child: Align(
+                                      alignment: Alignment.center,
+                                      child: Image.memory(
+                                          gameState.cards[player.cardIndex!]
+                                              .imageBytes!,
+                                          fit: BoxFit.cover),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8.0),
+                                ],
                                 Text(
                                   player.role,
                                   style: TextStyle(

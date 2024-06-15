@@ -215,10 +215,17 @@ class GameState with ChangeNotifier {
 
   void removeCard(CardModel card) {
     int cardIndex = cards.indexOf(card);
-    cards.remove(card);
+    //cards.remove(card);
+    cards[cardIndex] = CardModel(
+        title: '',
+        description: '',
+        type: CardType
+            .Asset); // TODO: not actually removing the card for now to keep the indices consistent
     // Remove the card from all players
     for (final player in players) {
-      player.cardsIndices.remove(cardIndex);
+      if (player.cardsIndices.contains(cardIndex)) {
+        player.cardsIndices.remove(cardIndex);
+      }
     }
     // Throw exception if the card is used in a scene or move
     for (final sceneOrMove in sceneAndMoves) {

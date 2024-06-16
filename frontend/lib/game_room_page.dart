@@ -19,8 +19,6 @@ class GameRoomPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final gameState = Provider.of<GameState>(context);
     final player = gameState.selectedPlayer;
-    bool isHovered = false;
-    Timer? timer;
 
     gameState.checkFinishedChallenges();
 
@@ -70,28 +68,6 @@ class GameRoomPage extends StatelessWidget {
       );
     }
 
-    void onHoverEnter(card) {
-      if (card == null) {
-        return;
-      }
-      isHovered = true;
-      timer = Timer(const Duration(milliseconds: 900), () {
-        if (isHovered) {
-          showCard(card);
-        }
-      });
-    }
-
-    void onHoverExit() {
-      isHovered = false;
-      timer?.cancel();
-    }
-
-    void onClick() {
-      isHovered = false;
-      timer?.cancel();
-    }
-
     return Scaffold(
       body: Column(
         children: [
@@ -113,94 +89,11 @@ class GameRoomPage extends StatelessWidget {
                             .toList()[index];
                         final isSelected = gameState.selectedPlayer == player;
 
-                        return GestureDetector(
-                          onTap: () {
-                            gameState.selectPlayer(player);
-                            onClick();
-                          },
-                          child: MouseRegion(
-                            onEnter: (_) => onHoverEnter(
-                                player.cardIndex != null
-                                    ? gameState.cards[player.cardIndex!]
-                                    : null),
-                            onExit: (_) => onHoverExit(),
-                            child: Container(
-                              width: 120,
-                              margin: const EdgeInsets.all(8.0),
-                              padding: const EdgeInsets.all(8.0),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? Colors.blueAccent
-                                    : Colors.white,
-                                borderRadius: BorderRadius.circular(8.0),
-                                border: Border.all(
-                                    color: isHovered
-                                        ? Colors.blue
-                                        : Colors.transparent,
-                                    width: 2.0),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.5),
-                                    spreadRadius: 2,
-                                    blurRadius: 5,
-                                    offset: const Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    player.name,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: isSelected
-                                          ? Colors.white
-                                          : Colors.black,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  if (player.cardIndex != null &&
-                                      gameState.cards[player.cardIndex!]
-                                              .imageBytes !=
-                                          null) ...[
-                                    Container(
-                                      margin: const EdgeInsets.symmetric(
-                                          horizontal: 8.0),
-                                      height: 80,
-                                      width: double.infinity,
-                                      child: Align(
-                                        alignment: Alignment.center,
-                                        child: Image.memory(
-                                          gameState.cards[player.cardIndex!]
-                                              .imageBytes!,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 8.0),
-                                  ],
-                                  Text(
-                                    player.role,
-                                    style: TextStyle(
-                                      color: isSelected
-                                          ? Colors.white
-                                          : Colors.black,
-                                    ),
-                                  ),
-                                  Text(
-                                    player.status,
-                                    style: TextStyle(
-                                      color: isSelected
-                                          ? Colors.white
-                                          : Colors.black,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                        return PlayerCard(
+                          player: player,
+                          gameState: gameState,
+                          isSelected: isSelected,
+                          showCard: showCard,
                         );
                       },
                     ),
@@ -404,5 +297,138 @@ class GameRoomPage extends StatelessWidget {
     if (response.statusCode != 200) {
       throw Exception('Failed to reset game state');
     }
+  }
+}
+
+class PlayerCard extends StatefulWidget {
+  final Player player;
+  final GameState gameState;
+  final bool isSelected;
+  final Function(CardModel?) showCard;
+
+  const PlayerCard({
+    Key? key,
+    required this.player,
+    required this.gameState,
+    required this.isSelected,
+    required this.showCard,
+  }) : super(key: key);
+
+  @override
+  _PlayerCardState createState() => _PlayerCardState();
+}
+
+class _PlayerCardState extends State<PlayerCard> {
+  bool isHovered = false;
+  Timer? timer;
+
+  void onHoverEnter(card) {
+    if (card == null) {
+      return;
+    }
+    setState(() {
+      isHovered = true;
+    });
+    timer = Timer(const Duration(milliseconds: 900), () {
+      if (isHovered) {
+        widget.showCard(card);
+      }
+    });
+  }
+
+  void onHoverExit() {
+    setState(() {
+      isHovered = false;
+    });
+    timer?.cancel();
+  }
+
+  void onClick() {
+    setState(() {
+      isHovered = false;
+    });
+    timer?.cancel();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final player = widget.player;
+    final gameState = widget.gameState;
+    final isSelected = widget.isSelected;
+
+    return GestureDetector(
+      onTap: () {
+        gameState.selectPlayer(player);
+        onClick();
+      },
+      child: MouseRegion(
+        onEnter: (_) => onHoverEnter(player.cardIndex != null
+            ? gameState.cards[player.cardIndex!]
+            : null),
+        onExit: (_) => onHoverExit(),
+        child: Container(
+          width: 120,
+          margin: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.blueAccent : Colors.white,
+            borderRadius: BorderRadius.circular(8.0),
+            border: Border.all(
+                color: isHovered ? Colors.blue : Colors.transparent,
+                width: 2.0),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.5),
+                spreadRadius: 2,
+                blurRadius: 5,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                player.name,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: isSelected ? Colors.white : Colors.black,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              if (player.cardIndex != null &&
+                  gameState.cards[player.cardIndex!].imageBytes != null) ...[
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                  height: 80,
+                  width: double.infinity,
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Image.memory(
+                      gameState.cards[player.cardIndex!].imageBytes!,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8.0),
+              ],
+              Text(
+                player.role,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.black,
+                ),
+              ),
+              Text(
+                player.status,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.black,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

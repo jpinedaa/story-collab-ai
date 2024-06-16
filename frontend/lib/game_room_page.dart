@@ -183,37 +183,55 @@ class GameRoomPage extends StatelessWidget {
                         },
                 ),
                 IconButton(
-                  icon: const Icon(Icons.add_circle_outline,
-                      color: Colors.blue, size: 45.0),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const CardCreationPage()),
-                    );
-                  },
+                  icon: Icon(Icons.add_circle_outline,
+                      color:
+                          !gameState.isAutoRunning ? Colors.blue : Colors.grey,
+                      size: 45.0),
+                  onPressed: !gameState.isAutoRunning
+                      ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const CardCreationPage()),
+                          );
+                        }
+                      : null,
                 ),
                 IconButton(
-                  icon: const Icon(Icons.folder,
-                      color: Color.fromARGB(255, 209, 209, 21), size: 45.0),
-                  onPressed: () async {
-                    gameState.openGameState();
-                  },
+                  icon: Icon(Icons.folder,
+                      color: !gameState.isAutoRunning
+                          ? const Color.fromARGB(255, 209, 209, 21)
+                          : Colors.grey,
+                      size: 45.0),
+                  onPressed: !gameState.isAutoRunning
+                      ? () async {
+                          gameState.openGameState();
+                        }
+                      : null,
                 ),
                 IconButton(
-                  icon:
-                      const Icon(Icons.save, color: Colors.purple, size: 45.0),
-                  onPressed: () async {
-                    gameState.saveGameState();
-                  },
+                  icon: Icon(Icons.save,
+                      color: !gameState.isAutoRunning
+                          ? Colors.purple
+                          : Colors.grey,
+                      size: 45.0),
+                  onPressed: !gameState.isAutoRunning
+                      ? () async {
+                          gameState.saveGameState();
+                        }
+                      : null,
                 ),
                 IconButton(
-                  icon:
-                      const Icon(Icons.refresh, color: Colors.red, size: 45.0),
-                  onPressed: () async {
-                    await resetGameState();
-                    gameState.fetchGameState();
-                  },
+                  icon: Icon(Icons.refresh,
+                      color:
+                          !gameState.isAutoRunning ? Colors.red : Colors.grey,
+                      size: 45.0),
+                  onPressed: !gameState.isAutoRunning
+                      ? () async {
+                          await resetGameState();
+                          gameState.fetchGameState();
+                        }
+                      : null,
                 ),
               ],
             ),
@@ -235,7 +253,8 @@ class GameRoomPage extends StatelessWidget {
                             .map((ind) => gameState.cards[ind])
                             .toList(),
                         disableEdit: gameState.sceneAndMoves.indexOf(item) !=
-                                gameState.sceneAndMoves.length - 1
+                                    gameState.sceneAndMoves.length - 1 ||
+                                gameState.isAutoRunning
                             ? true
                             : false,
                         child: IconButton(
@@ -266,7 +285,8 @@ class GameRoomPage extends StatelessWidget {
                             .cast<CardModel>(),
                         isMove: true,
                         disableEdit: gameState.sceneAndMoves.indexOf(item) !=
-                                gameState.sceneAndMoves.length - 1
+                                    gameState.sceneAndMoves.length - 1 ||
+                                gameState.isAutoRunning
                             ? true
                             : false,
                         child: IconButton(

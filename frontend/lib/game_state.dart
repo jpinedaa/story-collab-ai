@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'card_state.dart';
 import 'package:http/http.dart' as http;
+import 'package:file_picker/file_picker.dart';
 
 class Player {
   final String name;
@@ -85,6 +86,7 @@ class GameState with ChangeNotifier {
   List<CardModel> cards = [];
   List<int> finishedChallenges = [];
   Map<int, int> challengeProgress = {};
+  bool isAutoRunning = false;
 
   static const String backendUrl = 'http://127.0.0.1:5000/gamestate';
 
@@ -92,8 +94,11 @@ class GameState with ChangeNotifier {
     fetchGameState();
   }
 
-  Future<void> fetchGameState() async {
-    final response = await http.get(Uri.parse(backendUrl));
+  Future<void> fetchGameState([String? path]) async {
+    // Construct the URL with the optional path parameter
+    final url = path != null ? '$backendUrl?path=$path' : backendUrl;
+
+    final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       players = (data['players'] as List)
@@ -125,9 +130,12 @@ class GameState with ChangeNotifier {
     }
   }
 
-  Future<void> updateGameState() async {
+  Future<void> updateGameState([String? path]) async {
+    // Construct the URL with the optional path parameter
+    final url = path != null ? '$backendUrl?path=$path' : backendUrl;
+
     final response = await http.post(
-      Uri.parse(backendUrl),
+      Uri.parse(url),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'players': players.map((player) => player.toJson()).toList(),
@@ -145,6 +153,30 @@ class GameState with ChangeNotifier {
       throw Exception('Failed to update game state');
     }
     notifyListeners();
+  }
+
+  void startAutoRun() {
+    isAutoRunning = true;
+    notifyListeners();
+  }
+
+  void stopAutoRun() {
+    isAutoRunning = false;
+    notifyListeners();
+  }
+
+  Future<void> saveGameState() async {
+    String? outputFile = await FilePicker.platform.saveFile(
+      dialogTitle: 'Please select an output file:',
+      fileName: 'story.json',
+    );
+    updateGameState(outputFile);
+  }
+
+  Future<void> openGameState() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    fetchGameState(result!.files.single.path);
+    updateGameState();
   }
 
   void checkFinishedChallenges() {
@@ -248,7 +280,8 @@ class GameState with ChangeNotifier {
         type: CardType
             .Asset); // not actually removing the card for now to keep the indices consistent
     // Remove the card from all players
-    for (final player in players) {
+    final playersCopy = List<Player>.from(players);
+    for (final player in playersCopy) {
       if (player.cardsIndices.contains(cardIndex)) {
         player.cardsIndices.remove(cardIndex);
       }

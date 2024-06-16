@@ -170,6 +170,19 @@ class GameRoomPage extends StatelessWidget {
                   ),
                 ),
                 IconButton(
+                  icon: !gameState.isAutoRunning
+                      ? const Icon(Icons.play_arrow,
+                          color: Colors.green, size: 45.0)
+                      : const Icon(Icons.pause, color: Colors.red, size: 45.0),
+                  onPressed: !gameState.isAutoRunning
+                      ? () {
+                          gameState.startAutoRun();
+                        }
+                      : () {
+                          gameState.stopAutoRun();
+                        },
+                ),
+                IconButton(
                   icon: const Icon(Icons.add_circle_outline,
                       color: Colors.blue, size: 45.0),
                   onPressed: () {
@@ -178,6 +191,20 @@ class GameRoomPage extends StatelessWidget {
                       MaterialPageRoute(
                           builder: (context) => const CardCreationPage()),
                     );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.folder,
+                      color: Color.fromARGB(255, 209, 209, 21), size: 45.0),
+                  onPressed: () async {
+                    gameState.openGameState();
+                  },
+                ),
+                IconButton(
+                  icon:
+                      const Icon(Icons.save, color: Colors.purple, size: 45.0),
+                  onPressed: () async {
+                    gameState.saveGameState();
                   },
                 ),
                 IconButton(

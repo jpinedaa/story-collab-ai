@@ -12,8 +12,47 @@ import 'card_detail_dialog.dart';
 import 'settings_dialog.dart';
 import 'error_dialog.dart';
 
-class GameRoomPage extends StatelessWidget {
+class GameRoomPage extends StatefulWidget {
   const GameRoomPage({super.key});
+
+  @override
+  _GameRoomPageState createState() => _GameRoomPageState();
+}
+
+class _GameRoomPageState extends State<GameRoomPage> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    final gameState = Provider.of<GameState>(context, listen: false);
+
+    // Add a listener to the isAutoRunning property
+    gameState.addListener(_scrollToEndOnAutoRun);
+  }
+
+  @override
+  void dispose() {
+    final gameState = Provider.of<GameState>(context, listen: false);
+    gameState.removeListener(_scrollToEndOnAutoRun);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _scrollToEndOnAutoRun() {
+    final gameState = Provider.of<GameState>(context, listen: false);
+    if (gameState.isAutoRunning) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -184,6 +223,7 @@ class GameRoomPage extends StatelessWidget {
             child: Stack(
               children: [
                 ListView(
+                  controller: _scrollController,
                   padding: const EdgeInsets.all(8.0),
                   children: gameState.sceneAndMoves.map<Widget>((item) {
                     if (item is SceneComponent) {

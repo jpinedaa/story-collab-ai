@@ -14,17 +14,17 @@ class MoveEditorPage extends StatefulWidget {
 
 class MoveEditorPageState extends State<MoveEditorPage> {
   final _formKey = GlobalKey<FormState>();
-  Move _move = Move('');
-  final List<CardModel> _selectedSceneCards = [];
+  Move? _move;
   List<int> _selectedCardsIndices = [];
   String _description = '';
+  bool _isChallengeSelected = false;
 
   @override
   void initState() {
     super.initState();
     if (widget.move != null) {
       _move = widget.move!;
-      _selectedCardsIndices = _move.selectedCardsIndices;
+      _selectedCardsIndices = _move!.selectedCardsIndices;
     }
   }
 
@@ -32,6 +32,33 @@ class MoveEditorPageState extends State<MoveEditorPage> {
   Widget build(BuildContext context) {
     final gameState = Provider.of<GameState>(context);
     final player = gameState.selectedPlayer;
+
+    bool isChallengeFinishing = false;
+    for (int cardInt in _selectedCardsIndices) {
+      if (gameState.challengeProgress.keys.contains(cardInt) &&
+          gameState.challengeProgress[cardInt]! >= 2) {
+        isChallengeFinishing = true;
+        break;
+      }
+    }
+
+    List<int> usedCards = gameState.sceneAndMoves
+        .whereType<Move>()
+        .where((move) => move.character == gameState.selectedPlayer!.name)
+        .map((move) => move.selectedCardsIndices)
+        .expand((element) => element)
+        .toList();
+    usedCards.removeWhere((element) => _selectedCardsIndices.contains(element));
+
+    print('usedCards: $_selectedCardsIndices');
+    List<int> usedSceneCards = gameState.sceneAndMoves
+        .whereType<Move>()
+        .map((move) => move.selectedCardsIndices)
+        .expand((element) => element)
+        .toList();
+    usedSceneCards
+        .removeWhere((element) => _selectedCardsIndices.contains(element));
+    print('usedSceneCards: $usedSceneCards');
 
     if (player == null) {
       return Scaffold(
@@ -117,15 +144,38 @@ class MoveEditorPageState extends State<MoveEditorPage> {
                             ),
                           ),
                           const SizedBox(width: 10),
-                          Text(sceneCard.label),
+                          sceneCard.label == 'Pickup'
+                              ? !usedSceneCards.contains(
+                                      gameState.cards.indexOf(sceneCard.card))
+                                  ? Text(sceneCard.label)
+                                  : const Text('Pickup - Used')
+                              : !gameState.finishedChallenges.contains(
+                                      gameState.cards.indexOf(sceneCard.card))
+                                  ? Text(sceneCard.label)
+                                  : const Text('Challenge - Completed'),
                           Checkbox(
-                            value: _selectedSceneCards.contains(sceneCard.card),
+                            value: _selectedCardsIndices
+                                .map((ind) => gameState.cards[ind])
+                                .where((card) =>
+                                    card.type == CardType.Obstacle ||
+                                    card.playerStatus == PlayerStatus.NPC ||
+                                    card.type == CardType.Goal ||
+                                    card.type == CardType.Asset)
+                                .contains(sceneCard.card),
                             onChanged: (bool? value) {
                               setState(() {
-                                if (value == true) {
-                                  _selectedSceneCards.add(sceneCard.card);
-                                } else {
-                                  _selectedSceneCards.remove(sceneCard.card);
+                                if (!gameState.finishedChallenges.contains(
+                                        gameState.cards
+                                            .indexOf(sceneCard.card)) &&
+                                    !usedSceneCards.contains(gameState.cards
+                                        .indexOf(sceneCard.card))) {
+                                  if (value == true) {
+                                    _selectedCardsIndices.add(gameState.cards
+                                        .indexOf(sceneCard.card));
+                                  } else {
+                                    _selectedCardsIndices.remove(gameState.cards
+                                        .indexOf(sceneCard.card));
+                                  }
                                 }
                               });
                             },
@@ -175,20 +225,28 @@ class MoveEditorPageState extends State<MoveEditorPage> {
                             ),
                           ),
                           const SizedBox(width: 10),
-                          Text(card.label),
+                          usedCards.contains(gameState.cards.indexOf(card.card))
+                              ? Text('${card.label} - Used')
+                              : Text(card.label),
                           Checkbox(
                             value: _selectedCardsIndices
                                 .map((ind) => gameState.cards[ind])
+                                .where((card) =>
+                                    card.type != CardType.Obstacle &&
+                                    card.playerStatus != PlayerStatus.NPC)
                                 .toList()
                                 .contains(card.card),
                             onChanged: (bool? value) {
                               setState(() {
-                                if (value == true) {
-                                  _selectedCardsIndices
-                                      .add(gameState.cards.indexOf(card.card));
-                                } else {
-                                  _selectedCardsIndices.remove(
-                                      gameState.cards.indexOf(card.card));
+                                if (!usedCards.contains(
+                                    gameState.cards.indexOf(card.card))) {
+                                  if (value == true) {
+                                    _selectedCardsIndices.add(
+                                        gameState.cards.indexOf(card.card));
+                                  } else {
+                                    _selectedCardsIndices.remove(
+                                        gameState.cards.indexOf(card.card));
+                                  }
                                 }
                               });
                             },
@@ -199,9 +257,20 @@ class MoveEditorPageState extends State<MoveEditorPage> {
                   ),
                 ),
               const SizedBox(height: 16.0),
+              !isChallengeFinishing
+                  ? Container()
+                  : const Text(
+                      'You are finishing the challenge, write the outcome!',
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red),
+                    ),
               Expanded(
                 child: TextFormField(
-                  initialValue: _move.description,
+                  initialValue: _move != null && _move!.description != ''
+                      ? _move!.description
+                      : '',
                   decoration: const InputDecoration(
                     labelText: 'Description',
                     alignLabelWithHint: true,
@@ -221,19 +290,49 @@ class MoveEditorPageState extends State<MoveEditorPage> {
                 ),
               ),
               const SizedBox(height: 16.0),
+              !_isChallengeSelected
+                  ? Container()
+                  : Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: const Text(
+                        'You must select a challenge card to finish the challenge',
+                        style: TextStyle(color: Colors.red),
+                      )),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: ElevatedButton(
                   onPressed: hasCards
                       ? () {
+                          if (_selectedCardsIndices
+                              .map((ind) => gameState.cards[ind])
+                              .where((card) =>
+                                  card.type == CardType.Obstacle ||
+                                  card.playerStatus == PlayerStatus.NPC)
+                              .isNotEmpty) {
+                            if (_selectedCardsIndices
+                                .map((ind) => gameState.cards[ind])
+                                .where((card) =>
+                                    card.type != CardType.Obstacle &&
+                                    card.playerStatus != PlayerStatus.NPC)
+                                .isEmpty) {
+                              setState(() {
+                                _isChallengeSelected = true;
+                              });
+                              return;
+                            }
+                          }
                           if (_formKey.currentState?.validate() ?? false) {
                             _formKey.currentState?.save();
-                            _move = Move(_description,
+                            _move = Move(
+                                _description,
+                                gameState.selectedPlayer != null
+                                    ? gameState.selectedPlayer!.name
+                                    : 'ERROR: NO PLAYER SELECTED',
                                 selectedCardsIndices: _selectedCardsIndices);
                             if (widget.move == null) {
-                              gameState.makeMove(_move);
+                              gameState.makeMove(_move!);
                             } else {
-                              gameState.updateMove(widget.move!, _move);
+                              gameState.updateMove(widget.move!, _move!);
                             }
                             Navigator.pop(context); // Pop back to GameRoomPage
                           }

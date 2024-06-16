@@ -59,11 +59,13 @@ class SceneComponent {
 class Move {
   final String description;
   final List<int> selectedCardsIndices;
+  final String character;
 
-  Move(this.description, {this.selectedCardsIndices = const []});
+  Move(this.description, this.character,
+      {this.selectedCardsIndices = const []});
 
   factory Move.fromJson(Map<String, dynamic> json) {
-    return Move(json['description'],
+    return Move(json['description'], json['character'],
         selectedCardsIndices: (json['selectedCardsIndices'] as List<dynamic>)
             .map((e) => e as int)
             .toList());
@@ -71,6 +73,7 @@ class Move {
 
   Map<String, dynamic> toJson() => {
         'description': description,
+        'character': character,
         'selectedCardsIndices': selectedCardsIndices
       };
 }
@@ -80,6 +83,8 @@ class GameState with ChangeNotifier {
   List<dynamic> sceneAndMoves = [];
   Player? selectedPlayer;
   List<CardModel> cards = [];
+  List<int> finishedChallenges = [];
+  Map<int, int> challengeProgress = {};
 
   static const String backendUrl = 'http://127.0.0.1:5000/gamestate';
 
@@ -140,6 +145,27 @@ class GameState with ChangeNotifier {
       throw Exception('Failed to update game state');
     }
     notifyListeners();
+  }
+
+  void checkFinishedChallenges() {
+    challengeProgress.clear();
+    for (final sceneOrMove in sceneAndMoves) {
+      if (sceneOrMove is Move) {
+        for (int cardInd in sceneOrMove.selectedCardsIndices) {
+          if (cards[cardInd].type == CardType.Obstacle ||
+              cards[cardInd].playerStatus == PlayerStatus.NPC) {
+            challengeProgress.update(cardInd, (value) => value + 1,
+                ifAbsent: () => 1);
+          }
+        }
+      }
+      finishedChallenges.clear();
+      for (int cardInd in challengeProgress.keys) {
+        if (challengeProgress[cardInd]! >= 3) {
+          finishedChallenges.add(cardInd);
+        }
+      }
+    }
   }
 
   void selectPlayer(Player player) {
@@ -220,11 +246,14 @@ class GameState with ChangeNotifier {
         title: '',
         description: '',
         type: CardType
-            .Asset); // TODO: not actually removing the card for now to keep the indices consistent
+            .Asset); // not actually removing the card for now to keep the indices consistent
     // Remove the card from all players
     for (final player in players) {
       if (player.cardsIndices.contains(cardIndex)) {
         player.cardsIndices.remove(cardIndex);
+      }
+      if (player.cardIndex == cardIndex) {
+        players.remove(player);
       }
     }
     // Throw exception if the card is used in a scene or move

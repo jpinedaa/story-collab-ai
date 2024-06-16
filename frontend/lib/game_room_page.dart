@@ -20,6 +20,8 @@ class GameRoomPage extends StatelessWidget {
     bool isHovered = false;
     Timer? timer;
 
+    gameState.checkFinishedChallenges();
+
     void showCard(card) {
       showGeneralDialog(
         context: context,
@@ -66,7 +68,7 @@ class GameRoomPage extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: Container(
+                  child: SizedBox(
                     height: 180.0, // Ensure the height is explicitly defined
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
@@ -205,9 +207,15 @@ class GameRoomPage extends StatelessWidget {
                         selectedCards: item.selectedCardsIndices
                             .map((ind) => gameState.cards[ind])
                             .toList(),
+                        disableEdit: gameState.sceneAndMoves.indexOf(item) !=
+                                gameState.sceneAndMoves.length - 1
+                            ? true
+                            : false,
                         child: IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
                           onPressed: () {
+                            gameState.selectPlayer(gameState.players.firstWhere(
+                                (player) => player.role == 'Narrator'));
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -223,15 +231,23 @@ class GameRoomPage extends StatelessWidget {
                       );
                     } else {
                       return BaseContainer(
-                        title: 'Move',
+                        title: 'Move by ${item.character}',
                         content: item.description,
                         selectedCards: item.selectedCardsIndices
                             .map((ind) => gameState.cards[ind])
                             .toList()
                             .cast<CardModel>(),
+                        isMove: true,
+                        disableEdit: gameState.sceneAndMoves.indexOf(item) !=
+                                gameState.sceneAndMoves.length - 1
+                            ? true
+                            : false,
                         child: IconButton(
                           icon: const Icon(Icons.edit, color: Colors.blue),
                           onPressed: () {
+                            gameState.selectPlayer(gameState.players.firstWhere(
+                                (player) => player.name == item.character));
+
                             Navigator.push(
                               context,
                               MaterialPageRoute(

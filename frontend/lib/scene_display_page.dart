@@ -19,6 +19,7 @@ class SceneDisplayPageState extends State<SceneDisplayPage> {
   String _description = '';
   int? _selectedPlaceCardIndex;
   final List<int> _selectedChallengesIndices = [];
+  final List<int> _selectedCardIndicesOriginal = [];
 
   @override
   void initState() {
@@ -29,6 +30,7 @@ class SceneDisplayPageState extends State<SceneDisplayPage> {
       _selectedPlaceCardIndex = widget.sceneComponent!.placeCardIndex;
       _selectedChallengesIndices
           .addAll(widget.sceneComponent!.selectedCardsIndices);
+      _selectedCardIndicesOriginal.addAll(_selectedChallengesIndices);
     }
   }
 
@@ -47,6 +49,16 @@ class SceneDisplayPageState extends State<SceneDisplayPage> {
         ),
       );
     }
+
+    List<int> usedCards = gameState.sceneAndMoves
+        .whereType<SceneComponent>()
+        .map((sc) => sc.selectedCardsIndices)
+        .expand((element) => element)
+        .toList();
+    usedCards.removeWhere(
+        (element) => _selectedCardIndicesOriginal.contains(element));
+    print('usedCards: $usedCards');
+    print('_selectedChallengesIndices: $_selectedChallengesIndices');
 
     final placeCards = player.cardsIndices
         .map((ind) => gameState.cards[ind])
@@ -191,7 +203,10 @@ class SceneDisplayPageState extends State<SceneDisplayPage> {
                             ),
                           ),
                           const SizedBox(width: 10),
-                          Text(selectableCard.label),
+                          !usedCards.contains(
+                                  gameState.cards.indexOf(selectableCard.card))
+                              ? Text(selectableCard.label)
+                              : Text('${selectableCard.label} - Used'),
                           Checkbox(
                             value: _selectedChallengesIndices
                                 .map((ind) => gameState.cards[ind])
@@ -199,13 +214,17 @@ class SceneDisplayPageState extends State<SceneDisplayPage> {
                                 .contains(selectableCard.card),
                             onChanged: (bool? value) {
                               setState(() {
-                                if (value == true) {
-                                  _selectedChallengesIndices.add(gameState.cards
-                                      .indexOf(selectableCard.card));
-                                } else {
-                                  _selectedChallengesIndices.remove(gameState
-                                      .cards
-                                      .indexOf(selectableCard.card));
+                                if (!usedCards.contains(gameState.cards
+                                    .indexOf(selectableCard.card))) {
+                                  if (value == true) {
+                                    _selectedChallengesIndices.add(gameState
+                                        .cards
+                                        .indexOf(selectableCard.card));
+                                  } else {
+                                    _selectedChallengesIndices.remove(gameState
+                                        .cards
+                                        .indexOf(selectableCard.card));
+                                  }
                                 }
                               });
                             },

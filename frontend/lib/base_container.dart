@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/game_state.dart';
+import 'package:provider/provider.dart';
 import 'mini_card.dart';
 import 'card_state.dart';
 
@@ -11,6 +13,8 @@ class BaseContainer extends StatelessWidget {
   final CardModel? placeCard;
   final List<CardModel> selectedCards;
   final VoidCallback? onDelete;
+  final bool isMove;
+  final bool disableEdit;
 
   const BaseContainer({
     super.key,
@@ -22,10 +26,13 @@ class BaseContainer extends StatelessWidget {
     this.placeCard,
     this.selectedCards = const [],
     this.onDelete,
+    this.isMove = false,
+    this.disableEdit = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final gameState = Provider.of<GameState>(context);
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8.0),
       padding: const EdgeInsets.all(16.0),
@@ -82,9 +89,19 @@ class BaseContainer extends StatelessWidget {
                             String label = '';
                             if (card.type == CardType.Obstacle ||
                                 card.type == CardType.Character) {
-                              label = 'Challenge';
+                              int count = gameState.challengeProgress[
+                                          gameState.cards.indexOf(card)] ==
+                                      null
+                                  ? 0
+                                  : gameState.challengeProgress[
+                                      gameState.cards.indexOf(card)]!;
+                              label = 3 - count <= 0
+                                  ? 'Challenge - Completed'
+                                  : 'Challenge - ${3 - count}';
                             } else {
-                              label = 'Pickup - ${card.type.name}';
+                              label = !isMove
+                                  ? 'Pickup - ${card.type.name}'
+                                  : card.type.name;
                             }
                             return Container(
                               margin:
@@ -117,7 +134,7 @@ class BaseContainer extends StatelessWidget {
               ),
             ],
           ),
-          if (child != null || onDelete != null)
+          if ((child != null || onDelete != null) && !disableEdit)
             Positioned(
               top: 0,
               right: 0,

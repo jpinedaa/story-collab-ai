@@ -28,3 +28,11 @@ class SceneState(TypedDict):
     place: str
     challenges: list[str]
     pickup_cards: list[str]
+
+
+class MoveState(TypedDict):
+    messages: Annotated[Sequence[BaseMessage], operator.add]
+    description: str
+    challenges: list[str]
+    played: list[str]
+    pickup_cards: list[str]

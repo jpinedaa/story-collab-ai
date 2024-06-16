@@ -47,6 +47,33 @@ def parse_scene_generation(output):
         "No valid JSON object with the required structure found in the LLM output.")
 
 
+def parse_move_generation(output):
+    # Regular expression pattern to match JSON object
+    json_pattern = re.compile(r'\{(?:[^{}]|(?:\{[^{}]*\}))*\}')
+
+    # Find all JSON objects in the output
+    json_matches = json_pattern.findall(output)
+
+    if not json_matches:
+        raise ValueError("No JSON object found in the LLM output.")
+
+    for match in json_matches:
+        try:
+            # Attempt to load the JSON object
+            parsed_output = json.loads(match)
+
+            # Verify the structure of the parsed output
+            if all(key in parsed_output for key in
+                   ["challenges", "played", "description", "pickups"]):
+                return parsed_output['played'], parsed_output['description'], \
+                parsed_output['challenges'], parsed_output['pickups']
+        except json.JSONDecodeError:
+            continue
+
+    raise ValueError(
+        "No valid JSON object with the required structure found in the LLM output.")
+
+
 def build_graph(state_class, nodes, edges, entry_point):
     workflow = StateGraph(state_class)
 

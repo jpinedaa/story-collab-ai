@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'card_detail_dialog.dart';
 import 'settings_dialog.dart';
+import 'error_dialog.dart';
 
 class GameRoomPage extends StatelessWidget {
   const GameRoomPage({super.key});
@@ -22,6 +23,22 @@ class GameRoomPage extends StatelessWidget {
     Timer? timer;
 
     gameState.checkFinishedChallenges();
+
+    void showErrorDialog(BuildContext context, String message) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return ErrorDialog(message: message);
+        },
+      );
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (gameState.autoErrorMessage != null) {
+        showErrorDialog(context, gameState.autoErrorMessage!);
+        gameState.autoErrorMessage = null;
+      }
+    });
 
     void showSettings() {
       showGeneralDialog(
@@ -116,6 +133,11 @@ class GameRoomPage extends StatelessWidget {
                                     ? Colors.blueAccent
                                     : Colors.white,
                                 borderRadius: BorderRadius.circular(8.0),
+                                border: Border.all(
+                                    color: isHovered
+                                        ? Colors.blue
+                                        : Colors.transparent,
+                                    width: 2.0),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.grey.withOpacity(0.5),

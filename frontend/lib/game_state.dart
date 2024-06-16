@@ -89,6 +89,7 @@ class GameState with ChangeNotifier {
   Map<int, int> challengeProgress = {};
   bool isAutoRunning = false;
   Timer? _timer; // Add this line to declare the Timer object
+  String? autoErrorMessage;
 
   static const String backendUrl = 'http://127.0.0.1:5000/gamestate';
 
@@ -160,8 +161,14 @@ class GameState with ChangeNotifier {
 
   void startAutoRun({int intervalSeconds = 1}) {
     isAutoRunning = true;
-    http.get(Uri.parse('http://127.0.0.1:5000/autorun')).then((response) {
+    http
+        .get(Uri.parse(
+            'http://127.0.0.1:5000/autorun?selected=${selectedPlayer!.name}'))
+        .then((response) {
       if (response.statusCode != 200) {
+        autoErrorMessage = response.body;
+        isAutoRunning = false;
+        notifyListeners();
         throw Exception('Failed to make autorun request');
       }
     });

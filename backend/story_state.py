@@ -2,11 +2,12 @@ import json
 
 
 class Character:
-    def __init__(self, name, description, status):
+    def __init__(self, name, description, status, index = None):
         self.name = name
         self.description = description
         self.status = status
         self.cards = []
+        self.index = index
 
 
 class Card:
@@ -45,12 +46,16 @@ class Story:
     def get_narrator_available_cards_str(self):
         narrator_selected_cards = self.get_narrator_selected_cards()
         narrator_cards_str = 'The current cards available for the narrator are: \n'
+        count = 0
         for card in self.narratorCards:
             if card in narrator_selected_cards:
                 continue
             narrator_cards_str += (f'Title: {card.title} -'
                                    f' Description: {card.description} -'
                                    f' Type: {card.type}\n')
+            count += 1
+        if count == 0:
+            narrator_cards_str += 'No cards available.'
         return narrator_cards_str
 
     def get_characters_str(self):
@@ -86,6 +91,67 @@ class Story:
                 story_str += f'] - Description: {move.description}), '
             story_str += ']\n'
         return story_str
+
+    def get_character_available_cards_str(self, character):
+        character_obj = self.get_character_by_name(character)
+        character_selected_cards = self.get_character_selected_cards(character_obj)
+        character_cards_str = f'You are {character} and your current cards available are: \n'
+        selected_indices = [c.index for c in character_selected_cards]
+        count = 0
+        for card in character_obj.cards:
+            if card.index in selected_indices:
+                continue
+            character_cards_str += (f'Title: {card.title} -'
+                                    f' Description: {card.description} -'
+                                    f' Type: {card.type}\n')
+            count += 1
+        if count == 0:
+            character_cards_str += 'No cards available.'
+        return character_cards_str
+
+    def get_character_selected_cards(self, character):
+        selectedCards = []
+        for scene in self.scenes:
+            for move in scene.moves:
+                if move.character == character.name:
+                    selectedCards += move.cardsPlayed
+        return selectedCards
+
+    def get_unselected_character_card(self, character, title):
+        for card in character.cards:
+            if card.title == title and card not in self.get_character_selected_cards(character):
+                return card
+
+    def add_move(self, character, description, challenges, cardsPlayed, pickupCards):
+        character_obj = self.get_character_by_name(character)
+        challenges_cards = [self.get_narrator_card_by_title(cardTitle) for cardTitle in challenges]
+        cardsPlayed_cards = [self.get_unselected_character_card(character_obj, cardTitle) for cardTitle in cardsPlayed]
+        selectedCards = challenges_cards + cardsPlayed_cards
+
+        self.game_state['sceneAndMoves'].append(
+            {'character': character, 'description': description,
+             'selectedCardsIndices': [card.index for card in selectedCards]})
+
+        move = Move(character, description, challenges_cards, cardsPlayed_cards)
+        self.scenes[-1].moves.append(move)
+
+        pickupCards_cards = []
+        for cardTitle in pickupCards:
+            card = self.get_narrator_card_by_title(cardTitle)
+            character_obj.cards.append(card)
+            pickupCards_cards.append(card)
+
+        self.game_state['players'][character_obj.index]['cardsIndices'] = \
+            [card.index for card in character_obj.cards]
+
+        self.save()
+        return move
+
+    def get_narrator_card_by_title(self, title):
+        for card in self.narratorCards:
+            if card.title == title:
+                return card
+        return None
 
     def add_scene(self, title, description, place, challenges, pickupCards):
         challenges_cards = [self.get_unselected_narrator_card(cardTitle) for cardTitle in challenges]
@@ -139,7 +205,7 @@ class Story:
         for i, card in enumerate(self.game_state['cards']):
             if card['type'] == 'Character':
                 if card['playerStatus'] != 'NPC':
-                    character = Character(card['title'], card['description'], card['playerStatus'])
+                    character = Character(card['title'], card['description'], card['playerStatus'], i)
                     self.characters.append(character)
                     continue
                 if card['playerStatus'] == 'NPC':
@@ -248,5 +314,6 @@ if __name__ == "__main__":
     print(story.get_characters_str())
     print(story.get_story_str())
     print(story.get_narrator_available_cards_str())
+    print(story.get_character_available_cards_str(story.characters[0].name))
 
 

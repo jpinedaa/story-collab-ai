@@ -1,6 +1,8 @@
 import json
 import os
 import re
+import traceback
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from story_run import StoryRun
@@ -95,7 +97,12 @@ def save_settings():
 
 @app.route('/autorun', methods=['GET'])
 def handle_autorun():
-    StoryRun().run()
+    current = request.args.get('selected', '')
+    try:
+        StoryRun(current).run()
+    except Exception as e:
+        print(traceback.format_exc())
+        return jsonify({"error": str(e)}), 500
     return jsonify({"status": "Autorun request received"}), 200
 
 

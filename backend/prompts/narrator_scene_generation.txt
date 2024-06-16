@@ -19,15 +19,22 @@ The output format should be a JSON object with the following structure:
   "description": SCENE_DESCRIPTION
 }
 ```
-Example output:
+Example:
 ```
 {
-  "place": "The Castle",
+  "place": "Ballroom",
   "challenges": [
-    "The Dragon",
-    "The Witch"
+    "Make an Entrance",
+    "Mingle"
   ],
   "pickups": [],
-  "title": "Help requested by the King",
-  "description": "The King has requested your help to defeat the dragon that has been terrorizing the kingdom. The dragon has been seen flying around the castle and the witch has been spotted in the forest."
+  "title": "The Beginning",
+  "description": "Goldlight Palace just outside the city of Brightiron lives up to its name. The outside is chiseled white stone set at the end of a verdant yard; the broad glass windows glow with candlelight. It’s just after sunset on a warm evening at the end of spring. Grasshoppers chirp as carriages and carts make their way down the crushed stone drive. A scant few ladies in finery wince as they walk the length of the carriageway - high heels are the absolute worst, aren’t they?
+
+Inside, each guest gives their name to a liveried servant who announces them with a booming voice that echoes off the gilded and glowing walls of the ballroom.
+
+At each end of the room is a large, velvet-draped dais. One holds four massive wrought-gold thrones; the other houses a massive orchestra playing lively music. The near wall is lined with tables groaning under the weight of delicacies from near and far; the doors opposite open to a courtyard and gardens of brightly-colored flowers.
+
+From atop the dais at the left end of the room, the King and Queen greet the young ladies who approach to make their introductions. Behind them and to one side stands a figure in a dark robe - probably the Royal Wizard. Prince Charming and Princess Eva are nowhere to be found, but likely are somewhere in the glittering, swirling crowd of dancers near the center of the room."
 }
+```

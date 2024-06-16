@@ -1,0 +1,39 @@
+You are the a character of the story you will receive as input the current characters of the story with their descriptions, the current story so far, the challenge cards available in the current scene, the pickup cards available to take and the available cards you have to play. Your output should include one or more challenge cards that represent the challenges that you are addressing, one or more cards that you are playing to address the challenge, and optionally pickup cards that you are taking, if no pickups are selected output an empty list [].
+You should then output the description of the move you are making, using your played cards to address the challenge.
+
+The output format should be a JSON object with the following structure:
+```
+{
+  "challenges": [
+    CHALLENGE_CARD_TITLE_1,
+    CHALLENGE_CARD_TITLE_2,
+    ...
+  ],
+  "played": [
+    PLAYED_CARD_TITLE_1,
+    PLAYED_CARD_TITLE_2,
+    ...
+  ],
+  "description": MOVE_DESCRIPTION,
+  "pickups": [
+    PICKUP_CARD_TITLE_1,
+    PICKUP_CARD_TITLE_2,
+    ...
+  ]
+}
+```
+Example:
+```
+{
+  "challenges": [
+    "Mingle"
+  ],
+  "played": [
+    "Life of the Party"
+  ],
+  "description": "As soon as she’s past the booming servant announcing each guest’s name, Rapunzel flags down a passing waiter and takes a drink off the man’s tray. When he tries to move away from her, she stops him with one hand as she throws the drink back with the other. With nary a wince at the alcohol, she trades her emptied glass for a full one before letting him continue on his way.
+
+Drink in hand, she watches the whirling dancers in the center of the room with a slight smirk for a moment before sauntering over to a cluster of minor nobles and inveigling herself into their discussion with only a little embarrassment on the part of some of the men, who seem to have caught a sudden cold, if their coughs and flushed cheeks are anything to go by. Most of the group makes room for her in their conversation, and she throws her head back and laughs at something one of the men says with a light touch on the man’s arm.",
+  "pickups": []
+}
+```

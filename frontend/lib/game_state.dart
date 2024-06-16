@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async'; // Add this import
 import 'package:flutter/material.dart';
 import 'card_state.dart';
 import 'package:http/http.dart' as http;
@@ -87,6 +88,7 @@ class GameState with ChangeNotifier {
   List<int> finishedChallenges = [];
   Map<int, int> challengeProgress = {};
   bool isAutoRunning = false;
+  Timer? _timer; // Add this line to declare the Timer object
 
   static const String backendUrl = 'http://127.0.0.1:5000/gamestate';
 
@@ -155,13 +157,21 @@ class GameState with ChangeNotifier {
     notifyListeners();
   }
 
-  void startAutoRun() {
+  void startAutoRun({int intervalSeconds = 5}) {
     isAutoRunning = true;
+    _timer = Timer.periodic(Duration(seconds: intervalSeconds), (timer) {
+      if (isAutoRunning) {
+        fetchGameState();
+      } else {
+        timer.cancel();
+      }
+    });
     notifyListeners();
   }
 
   void stopAutoRun() {
     isAutoRunning = false;
+    _timer?.cancel();
     notifyListeners();
   }
 

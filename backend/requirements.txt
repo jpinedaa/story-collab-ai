@@ -1,2 +1,6 @@
 Flask~=3.0.3
 Flask-Cors~=4.0.1
+langchain~=0.2.5
+langchain-nvidia-ai-endpoints~=0.1.2
+langgraph ~=0.0.69
+httpx~=1.0.0b0

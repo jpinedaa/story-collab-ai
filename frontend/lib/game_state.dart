@@ -175,7 +175,10 @@ class GameState with ChangeNotifier {
 
   Future<void> openGameState() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles();
-    fetchGameState(result!.files.single.path);
+    if (result == null) {
+      return;
+    }
+    fetchGameState(result.files.single.path);
     updateGameState();
   }
 

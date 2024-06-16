@@ -120,7 +120,7 @@ class GameState with ChangeNotifier {
       // Ensure there is a narrator
       final narrator =
           players.firstWhere((player) => player.role == 'Narrator', orElse: () {
-        final newNarrator = Player('', 'Narrator', 'Manual');
+        final newNarrator = Player('', 'Narrator', 'Auto');
         players.add(newNarrator);
         return newNarrator;
       });
@@ -158,13 +158,20 @@ class GameState with ChangeNotifier {
     notifyListeners();
   }
 
-  void startAutoRun({int intervalSeconds = 5}) {
+  void startAutoRun({int intervalSeconds = 1}) {
     isAutoRunning = true;
+    http.get(Uri.parse('http://127.0.0.1:5000/autorun')).then((response) {
+      if (response.statusCode != 200) {
+        throw Exception('Failed to make autorun request');
+      }
+    });
     _timer = Timer.periodic(Duration(seconds: intervalSeconds), (timer) {
-      if (isAutoRunning) {
+      if (isAutoRunning && selectedPlayer!.status == 'Auto') {
         fetchGameState();
       } else {
+        isAutoRunning = false;
         timer.cancel();
+        notifyListeners();
       }
     });
     notifyListeners();

@@ -347,21 +347,24 @@ class GameRoomPage extends StatelessWidget {
                   child: Center(
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => player?.role == 'Narrator'
-                                  ? const SceneDisplayPage()
-                                  : const MoveEditorPage(),
-                            ),
-                          );
-                        },
-                        child: Text(player?.role == 'Narrator'
-                            ? 'Create Scene'
-                            : 'Make a Move'),
-                      ),
+                      child: !gameState.isAutoRunning
+                          ? ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        player?.role == 'Narrator'
+                                            ? const SceneDisplayPage()
+                                            : const MoveEditorPage(),
+                                  ),
+                                );
+                              },
+                              child: Text(player?.role == 'Narrator'
+                                  ? 'Create Scene'
+                                  : 'Make a Move'),
+                            )
+                          : null,
                     ),
                   ),
                 ),

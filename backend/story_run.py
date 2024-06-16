@@ -1,5 +1,5 @@
 from story_state import Story
-from server import get_model
+from settings import get_model
 from narrator import Narrator
 #from character import Character
 

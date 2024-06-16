@@ -57,8 +57,6 @@ class SceneDisplayPageState extends State<SceneDisplayPage> {
         .toList();
     usedCards.removeWhere(
         (element) => _selectedCardIndicesOriginal.contains(element));
-    print('usedCards: $usedCards');
-    print('_selectedChallengesIndices: $_selectedChallengesIndices');
 
     final placeCards = player.cardsIndices
         .map((ind) => gameState.cards[ind])

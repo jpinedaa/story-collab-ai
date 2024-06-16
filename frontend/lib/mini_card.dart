@@ -69,7 +69,7 @@ class MiniCard extends StatelessWidget {
             Text(
               card.description,
               style: const TextStyle(fontSize: 12.0),
-              maxLines: 1,
+              maxLines: card.imageBytes != null ? 1 : 7,
               overflow: TextOverflow.ellipsis,
             ),
           ],

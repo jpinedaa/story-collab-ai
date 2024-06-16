@@ -50,7 +50,6 @@ class MoveEditorPageState extends State<MoveEditorPage> {
         .toList();
     usedCards.removeWhere((element) => _selectedCardsIndices.contains(element));
 
-    print('usedCards: $_selectedCardsIndices');
     List<int> usedSceneCards = gameState.sceneAndMoves
         .whereType<Move>()
         .map((move) => move.selectedCardsIndices)
@@ -58,7 +57,6 @@ class MoveEditorPageState extends State<MoveEditorPage> {
         .toList();
     usedSceneCards
         .removeWhere((element) => _selectedCardsIndices.contains(element));
-    print('usedSceneCards: $usedSceneCards');
 
     if (player == null) {
       return Scaffold(
@@ -164,11 +162,12 @@ class MoveEditorPageState extends State<MoveEditorPage> {
                                 .contains(sceneCard.card),
                             onChanged: (bool? value) {
                               setState(() {
-                                if (!gameState.finishedChallenges.contains(
+                                if ((!gameState.finishedChallenges.contains(
                                         gameState.cards
-                                            .indexOf(sceneCard.card)) &&
-                                    !usedSceneCards.contains(gameState.cards
-                                        .indexOf(sceneCard.card))) {
+                                            .indexOf(sceneCard.card))) &&
+                                    (!usedSceneCards.contains(gameState.cards
+                                            .indexOf(sceneCard.card)) ||
+                                        sceneCard.label == 'Challenge')) {
                                   if (value == true) {
                                     _selectedCardsIndices.add(gameState.cards
                                         .indexOf(sceneCard.card));

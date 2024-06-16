@@ -9,6 +9,7 @@ import 'card_state.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'card_detail_dialog.dart';
+import 'settings_dialog.dart';
 
 class GameRoomPage extends StatelessWidget {
   const GameRoomPage({super.key});
@@ -22,6 +23,21 @@ class GameRoomPage extends StatelessWidget {
 
     gameState.checkFinishedChallenges();
 
+    void showSettings() {
+      showGeneralDialog(
+        context: context,
+        barrierDismissible: true,
+        barrierLabel:
+            MaterialLocalizations.of(context).modalBarrierDismissLabel,
+        barrierColor: Colors.black54,
+        transitionDuration: const Duration(milliseconds: 100),
+        pageBuilder: (BuildContext buildContext, Animation animation,
+            Animation secondaryAnimation) {
+          return const SettingsDialog();
+        },
+      );
+    }
+
     void showCard(card) {
       showGeneralDialog(
         context: context,
@@ -32,8 +48,7 @@ class GameRoomPage extends StatelessWidget {
         transitionDuration: const Duration(milliseconds: 100),
         pageBuilder: (BuildContext buildContext, Animation animation,
             Animation secondaryAnimation) {
-          return CardDetailDialog(
-              card: card, showEditDelete: false); // Add showEditDelete: false
+          return CardDetailDialog(card: card, showEditDelete: false);
         },
       );
     }
@@ -69,7 +84,7 @@ class GameRoomPage extends StatelessWidget {
               children: [
                 Expanded(
                   child: SizedBox(
-                    height: 180.0, // Ensure the height is explicitly defined
+                    height: 180.0,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: gameState.players
@@ -222,6 +237,18 @@ class GameRoomPage extends StatelessWidget {
                       : null,
                 ),
                 IconButton(
+                  icon: Icon(Icons.settings,
+                      color: !gameState.isAutoRunning
+                          ? const Color.fromARGB(255, 43, 41, 41)
+                          : Colors.grey,
+                      size: 45.0),
+                  onPressed: !gameState.isAutoRunning
+                      ? () {
+                          showSettings();
+                        }
+                      : null,
+                ),
+                IconButton(
                   icon: Icon(Icons.refresh,
                       color:
                           !gameState.isAutoRunning ? Colors.red : Colors.grey,
@@ -229,7 +256,9 @@ class GameRoomPage extends StatelessWidget {
                   onPressed: !gameState.isAutoRunning
                       ? () async {
                           await resetGameState();
-                          gameState.fetchGameState();
+                          if (context.mounted) {
+                            gameState.fetchGameState();
+                          }
                         }
                       : null,
                 ),

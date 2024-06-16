@@ -10,10 +10,11 @@ class Character:
 
 
 class Card:
-    def __init__(self, title, description, type):
+    def __init__(self, title, description, type, index):
         self.title = title
         self.description = description
         self.type = type
+        self.index = index
 
 
 class Move:
@@ -25,7 +26,7 @@ class Move:
 
 
 class Scene:
-    def __init__(self, title, description, place, challenges, pickupCards):
+    def __init__(self, title, description, challenges, pickupCards, place):
         self.title = title
         self.description = description
         self.place = place
@@ -39,6 +40,87 @@ class Story:
         self.characters = []
         self.narratorCards = []
         self.scenes = []
+        self.game_state = None
+
+    def get_narrator_available_cards_str(self):
+        narrator_selected_cards = self.get_narrator_selected_cards()
+        narrator_cards_str = 'The current cards available for the narrator are: \n'
+        for card in self.narratorCards:
+            if card in narrator_selected_cards:
+                continue
+            narrator_cards_str += (f'Title: {card.title} -'
+                                   f' Description: {card.description} -'
+                                   f' Type: {card.type}\n')
+        return narrator_cards_str
+
+    def get_characters_str(self):
+        characters_str = 'The current characters in the story are: \n'
+        for character in self.characters:
+            characters_str += (f'Name: {character.name} -'
+                               f' Description: {character.description}\n')
+        return characters_str
+
+    def get_story_str(self):
+        story_str = 'The current story is: \n'
+        if len(self.scenes) == 0:
+            return 'No scenes have been written yet.'
+
+        for scene in self.scenes:
+            story_str += "New Scene: \n"
+            story_str += f'Title: {scene.title} - Place: {scene.place.title} -'
+            story_str += 'Challenges: ['
+            for challenge in scene.challenges:
+                story_str += f'({challenge.title}: {challenge.description}), '
+            story_str += '] - Available Pickup Cards: ['
+            for card in scene.pickupCards:
+                story_str += f'({card.title}: {card.description}), '
+            story_str += '] - Moves: ['
+            for move in scene.moves:
+                story_str += f'(Move by {move.character}: '
+                story_str += f'Challenges addressed: ['
+                for challenge in move.challenge:
+                    story_str += f'{challenge.title}, '
+                story_str += '] - Cards Played: ['
+                for card in move.cardsPlayed:
+                    story_str += f'({card.title}: {card.description}), '
+                story_str += f'] - Description: {move.description}), '
+            story_str += ']\n'
+        return story_str
+
+    def add_scene(self, title, description, place, challenges, pickupCards):
+        challenges_cards = [self.get_unselected_narrator_card(cardTitle) for cardTitle in challenges]
+        pickupCards_cards = [self.get_unselected_narrator_card(cardTitle) for cardTitle in pickupCards]
+        selectedCards = challenges_cards + pickupCards_cards
+        placeCard = self.get_place_by_title(place)
+
+        self.game_state['sceneAndMoves'].append(
+            {'title': title, 'description': description,
+             'selectedCardsIndices': [card.index for card in selectedCards],
+             'placeCardIndex': placeCard.index})
+
+        scene = Scene(title, description, challenges_cards, pickupCards_cards, placeCard)
+        self.scenes.append(scene)
+
+        self.save()
+        return scene
+
+    def get_place_by_title(self, title):
+        for card in self.narratorCards:
+            if card.type == 'Place' and card.title == title:
+                return card
+        return None
+
+    def get_narrator_selected_cards(self):
+        selectedCards = []
+        for scene in self.scenes:
+            selectedCards.append(scene.challenges)
+            selectedCards.append(scene.pickupCards)
+        return selectedCards
+
+    def get_unselected_narrator_card(self, title):
+        for card in self.narratorCards:
+            if card.title == title and card not in self.get_narrator_selected_cards():
+                return card
 
     def get_character_by_name(self, name):
         for character in self.characters:
@@ -46,60 +128,125 @@ class Story:
                 return character
         return None
 
+    def save(self):
+        with open('game_state.json', 'w') as file:
+            json.dump(self.game_state, file, indent=4)
+
     def load(self):
         with open('game_state.json', 'r') as file:
-            game_state = json.load(file)
+            self.game_state = json.load(file)
 
-        for card in game_state['cards']:
+        for i, card in enumerate(self.game_state['cards']):
             if card['type'] == 'Character':
                 if card['playerStatus'] != 'NPC':
                     character = Character(card['title'], card['description'], card['playerStatus'])
                     self.characters.append(character)
                     continue
                 if card['playerStatus'] == 'NPC':
-                    card = Card(card['title'], card['description'], card['type'])
+                    card = Card(card['title'], card['description'], card['type'], i)
                     self.narratorCards.append(card)
                     continue
             if card['type'] == 'Obstacle' or card['type'] == 'Place':
-                card = Card(card['title'], card['description'], card['type'])
+                card = Card(card['title'], card['description'], card['type'], i)
                 self.narratorCards.append(card)
 
-        for player in game_state['players']:
+        for player in self.game_state['players']:
             if player['role'] == 'Narrator':
                 continue
 
             for ind in player['cardsIndices']:
-                card_dict = game_state['cards'][ind]
-                card = Card(card_dict['title'], card_dict['description'], card_dict['type'])
+                card_dict = self.game_state['cards'][ind]
+                card = Card(card_dict['title'], card_dict['description'], card_dict['type'], ind)
                 self.get_character_by_name(player['name']).cards.append(card)
 
-        for i, sceneOrMove in enumerate(game_state['sceneAndMoves']):
+        for i, sceneOrMove in enumerate(self.game_state['sceneAndMoves']):
             if 'title' in sceneOrMove:
                 challenges = []
                 pickupCards = []
-                for ind in game_state['sceneAndMoves'][i]['selectedCardsIndices']:
-                    card_dict = game_state['cards'][ind]
-                    card = Card(card_dict['title'], card_dict['description'], card_dict['type'])
+                place = None
+                for ind in self.game_state['sceneAndMoves'][i]['selectedCardsIndices']:
+                    card_dict = self.game_state['cards'][ind]
+                    card = Card(card_dict['title'], card_dict['description'], card_dict['type'], ind)
                     if card_dict['type'] == 'Character' or card_dict['type'] == 'Obstacle':
                         challenges.append(card)
                     else:
                         pickupCards.append(card)
-                scene = Scene(sceneOrMove['title'], sceneOrMove['description'], sceneOrMove['place'], challenges, pickupCards)
+                if 'placeCardIndex' in sceneOrMove:
+                    card_dict = self.game_state['cards'][sceneOrMove['placeCardIndex']]
+                    place = Card(card_dict['title'], card_dict['description'], card_dict['type'], sceneOrMove['placeCardIndex'])
+                scene = Scene(sceneOrMove['title'], sceneOrMove['description'], challenges, pickupCards, place)
                 j = i + 1
-                while j < len(game_state['sceneAndMoves']) and 'title' not in game_state['sceneAndMoves'][j]:
+                while j < len(self.game_state['sceneAndMoves']) and 'title' not in self.game_state['sceneAndMoves'][j]:
                     challenges = []
                     cardsPlayed = []
-                    for ind in game_state['sceneAndMoves'][j]['selectedCardsIndices']:
-                        card_dict = game_state['cards'][ind]
-                        card = Card(card_dict['title'], card_dict['description'], card_dict['type'])
+                    for ind in self.game_state['sceneAndMoves'][j]['selectedCardsIndices']:
+                        card_dict = self.game_state['cards'][ind]
+                        card = Card(card_dict['title'], card_dict['description'], card_dict['type'], ind)
                         if card_dict['type'] == 'Character' or card_dict['type'] == 'Obstacle':
                             challenges.append(card)
                         else:
                             cardsPlayed.append(card)
 
-                    move = Move(game_state['sceneAndMoves'][j]['character'], game_state['sceneAndMoves'][j]['description'], challenges, cardsPlayed)
+                    move = Move(self.game_state['sceneAndMoves'][j]['character'], self.game_state['sceneAndMoves'][j]['description'], challenges, cardsPlayed)
                     scene.moves.append(move)
                     j += 1
                 self.scenes.append(scene)
+
+
+if __name__ == "__main__":
+    story = Story()
+    story.load()
+    print('-----------------------------------------------------------------------------Characters:')
+    for character in story.characters:
+        print(character.name)
+        print(character.description)
+        print(character.status)
+        print('Cards:')
+        for card in character.cards:
+            print(card.title)
+            print(card.description)
+            print(card.type)
+        print('----------------------------------------------------------------------------------')
+    print('-------------------------------------------------------------------------Narrator Cards:')
+    for card in story.narratorCards:
+        print(card.title)
+        print(card.description)
+        print(card.type)
+        print('------------------------------------------------------------------------------------')
+    print('----------------------------------------------------------------------------------Scenes:')
+    for scene in story.scenes:
+        print(scene.title)
+        print(scene.description)
+        print(scene.place.title if scene.place else None)
+        print('---------------------------------------------------------Challenges:')
+        for challenge in scene.challenges:
+            print(challenge.title)
+            print(challenge.description)
+            print(challenge.type)
+        print('---------------------------------------------------------Pickup Cards:')
+        for card in scene.pickupCards:
+            print(card.title)
+            print(card.description)
+            print(card.type)
+        print('---------------------------------------------------------------Moves:')
+        for move in scene.moves:
+            print('----------------------------------------------------Move:')
+            print(move.character)
+            print(move.description)
+            print('-----------------------Challenges:')
+            for challenge in move.challenge:
+                print(challenge.title)
+                print(challenge.description)
+                print(challenge.type)
+            print('---------------------Cards Played:')
+            for card in move.cardsPlayed:
+                print(card.title)
+                print(card.description)
+                print(card.type)
+        print('----------------------------------------------------------')
+
+    print(story.get_characters_str())
+    print(story.get_story_str())
+    print(story.get_narrator_available_cards_str())
 
 

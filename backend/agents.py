@@ -21,53 +21,10 @@ def create_agent(llm, system_message: str):
     return prompt | llm
 
 
-class AgentState(TypedDict):
+class SceneState(TypedDict):
     messages: Annotated[Sequence[BaseMessage], operator.add]
-    sender: str
-    # time.now type
-    last_time: datetime
-
-
-class AgentStateCustom(TypedDict):
-    plan: str
-    current_task: str
-    current_image: str
-    previous_image: str
-    commands: str
-    commands_feedback: str
-    approved: bool
-    generator_messages: Annotated[Sequence[BaseMessage], operator.add]
-
-
-class TreeNode:
-    def __init__(self, image, commands, parent=None):
-        self.image = image
-        self.commands = commands
-        self.parent = parent
-        self.children = []
-
-    def add_child(self, child):
-        self.children.append(child)
-        child.parent = self
-
-
-class TreeOfThoughts:
-    def __init__(self, root):
-        self.root = root
-        self.current_node = root
-
-    def add_node(self, node):
-        self.current_node.add_child(node)
-        self.current_node = node
-
-    def back(self):
-        self.current_node = self.current_node.parent
-
-
-class AgentStateToT(TypedDict):
-    messages: Annotated[Sequence[BaseMessage], operator.add]
-    sender: str
-    last_time: datetime
-    tree: TreeOfThoughts
-    current_node: TreeNode
-    root: TreeNode
+    title: str
+    description: str
+    place: str
+    challenges: list[str]
+    pickup_cards: list[str]

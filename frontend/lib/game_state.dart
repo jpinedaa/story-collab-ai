@@ -94,6 +94,7 @@ class GameState with ChangeNotifier {
 
   GameState() {
     fetchGameState();
+    loadSettings();
   }
 
   Future<void> fetchGameState([String? path]) async {
@@ -172,6 +173,7 @@ class GameState with ChangeNotifier {
   void stopAutoRun() {
     isAutoRunning = false;
     _timer?.cancel();
+    fetchGameState();
     notifyListeners();
   }
 
@@ -320,5 +322,52 @@ class GameState with ChangeNotifier {
     }
     updateGameState();
     notifyListeners();
+  }
+
+  String? _apiKey;
+  String? _model;
+
+  String? get apiKey => _apiKey;
+  String? get model => _model;
+
+  void setApiKey(String apiKey) {
+    _apiKey = apiKey;
+    notifyListeners();
+  }
+
+  void setModel(String model) {
+    _model = model;
+    notifyListeners();
+  }
+
+  Future<void> loadSettings() async {
+    const url = 'http://127.0.0.1:5000/settings';
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final settings = json.decode(response.body);
+      _apiKey = settings['apiKey'];
+      _model = settings['model'];
+      notifyListeners();
+    } else {
+      throw Exception('Failed to load settings');
+    }
+  }
+
+  Future<void> saveSettings() async {
+    const url = 'http://127.0.0.1:5000/settings';
+    final settings = {
+      'apiKey': _apiKey,
+      'model': _model,
+    };
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(settings),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to save settings');
+    }
   }
 }

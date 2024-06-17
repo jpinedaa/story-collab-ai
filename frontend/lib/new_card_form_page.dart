@@ -93,7 +93,7 @@ class NewCardFormPageState extends State<NewCardFormPage> {
   // }
 
   Future<Uint8List> compressImage(Uint8List bytes,
-      {int targetWidth = 800, int targetHeight = 600}) async {
+      {int targetWidth = 300, int targetHeight = 300}) async {
     // Decode the image
     img.Image image = img.decodeImage(bytes)!;
 

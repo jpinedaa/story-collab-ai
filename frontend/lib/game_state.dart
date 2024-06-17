@@ -312,6 +312,7 @@ class GameState with ChangeNotifier {
       if (player != null) {
         final newPlayer = Player(
             newCard.title, 'Character', newCard.playerStatus!.name,
+            cardsIndices: player.cardsIndices,
             cardIndex: cards.indexOf(newCard));
         players[players.indexOf(player)] = newPlayer;
       }

@@ -4,7 +4,7 @@ from fuzzywuzzy import fuzz
 from filelock import FileLock
 
 
-def fuzzy_compare(string1, string2, threshold=80):
+def fuzzy_compare(string1, string2, threshold=60):
     """
     Compare two strings and return True if their similarity ratio
     is above the given threshold, otherwise return False.
@@ -111,7 +111,7 @@ class Story:
 
     def get_challenge_card_by_title(self, title):
         for card in self.narratorCards:
-            if fuzzy_compare(card.title, title, threshold=80) and card.type != 'Place':
+            if fuzzy_compare(card.title, title) and card.type != 'Place':
                 return card
         return None
 
@@ -205,13 +205,13 @@ class Story:
         selectedCards = []
         for scene in self.scenes:
             for move in scene.moves:
-                if fuzzy_compare(move.character, character.name, threshold=80):
+                if fuzzy_compare(move.character, character.name):
                     selectedCards += move.cardsPlayed
         return selectedCards
 
     def get_unselected_character_card(self, character, title):
         for card in character.cards:
-            if fuzzy_compare(card.title, title, threshold=80) and card not in self.get_character_selected_cards(character):
+            if fuzzy_compare(card.title, title) and card not in self.get_character_selected_cards(character):
                 return card
 
     def add_move(self, character, description, challenges, cardsPlayed, pickupCards):
@@ -242,7 +242,7 @@ class Story:
 
     def get_narrator_card_by_title(self, title):
         for card in self.narratorCards:
-            if fuzzy_compare(card.title, title, threshold=80):
+            if fuzzy_compare(card.title, title):
                 return card
         return None
 
@@ -266,7 +266,7 @@ class Story:
 
     def get_place_by_title(self, title):
         for card in self.narratorCards:
-            if card.type == 'Place' and fuzzy_compare(card.title, title, threshold=80):
+            if card.type == 'Place' and fuzzy_compare(card.title, title):
                 return card
         return None
 
@@ -279,12 +279,12 @@ class Story:
 
     def get_unselected_narrator_card(self, title):
         for card in self.narratorCards:
-            if fuzzy_compare(card.title, title, threshold=80) and card not in self.get_narrator_selected_cards():
+            if fuzzy_compare(card.title, title) and card not in self.get_narrator_selected_cards():
                 return card
 
     def get_character_by_name(self, name):
         for character in self.characters:
-            if fuzzy_compare(character.name, name, threshold=80):
+            if fuzzy_compare(character.name, name):
                 return character
         return None
 

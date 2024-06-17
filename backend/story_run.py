@@ -21,7 +21,7 @@ class StoryRun:
             else:
                 self.character.generate_next_scene(self.current)
                 self.current = self.narrator.choose_next_character()
-            if self.story.check_auto_mode() == 0:
+            if self.story.get_auto_mode() == 0:
                 break
 
 

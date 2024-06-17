@@ -125,6 +125,7 @@ class GameState with ChangeNotifier {
         return newNarrator;
       });
       selectedPlayer = players[data['selectedPlayerIndex'] as int];
+      print('autoMode: ${data['autoMode']}');
       isAutoRunning = (data['autoMode'] as int) == 1;
 
       notifyListeners();
@@ -136,6 +137,7 @@ class GameState with ChangeNotifier {
   Future<void> updateGameState([String? path]) async {
     // Construct the URL with the optional path parameter
     final url = path != null ? '$backendUrl?path=$path' : backendUrl;
+    print('updating automode: $isAutoRunning ');
 
     final response = await http.post(
       Uri.parse(url),
@@ -154,6 +156,7 @@ class GameState with ChangeNotifier {
         'autoMode': isAutoRunning ? 1 : 0,
       }),
     );
+    print('updated automode: $isAutoRunning ');
     if (response.statusCode != 200) {
       throw Exception('Failed to update game state');
     }
@@ -163,6 +166,8 @@ class GameState with ChangeNotifier {
   void startAutoRun({int intervalSeconds = 1}) {
     isAutoRunning = true;
     updateGameState();
+    // sleep for a second to allow the game state to update
+    Future.delayed(const Duration(milliseconds: 500));
     http
         .get(Uri.parse(
             'http://127.0.0.1:5000/autorun?selected=${selectedPlayer!.name}'))
@@ -189,10 +194,9 @@ class GameState with ChangeNotifier {
   }
 
   void stopAutoRun() {
+    _timer?.cancel();
     isAutoRunning = false;
     updateGameState();
-    _timer?.cancel();
-    fetchGameState();
     notifyListeners();
   }
 

@@ -44,16 +44,17 @@ class Story:
         self.scenes = []
         self.game_state = None
 
-    def check_auto_mode(self):
-        with open(STATE_FILE, 'r') as file:
-            game_state = json.load(file)
-        return game_state['autoMode']
+    def get_auto_mode(self):
+        self.open()
+        return self.game_state['autoMode']
 
     def set_auto_mode(self, auto_mode):
+        self.open()
         self.game_state['autoMode'] = auto_mode
         self.save()
 
     def set_selected_player(self, character):
+        self.open()
         self.game_state['selectedPlayerIndex'] = (
             self.get_character_by_name(character).index)
         self.save()
@@ -110,7 +111,7 @@ class Story:
     def get_character_available_cards_str(self, character):
         character_obj = self.get_character_by_name(character)
         character_selected_cards = self.get_character_selected_cards(character_obj)
-        character_cards_str = f'You are {character} and your current cards available are: \n'
+        character_cards_str = f'You control {character} and your current cards available are: \n'
         selected_indices = [c.index for c in character_selected_cards]
         count = 0
         for card in character_obj.cards:
@@ -143,6 +144,7 @@ class Story:
         cardsPlayed_cards = [self.get_unselected_character_card(character_obj, cardTitle) for cardTitle in cardsPlayed]
         selectedCards = challenges_cards + cardsPlayed_cards
 
+        self.open()
         self.game_state['sceneAndMoves'].append(
             {'character': character, 'description': description,
              'selectedCardsIndices': [card.index for card in selectedCards]})
@@ -174,6 +176,7 @@ class Story:
         selectedCards = challenges_cards + pickupCards_cards
         placeCard = self.get_place_by_title(place)
 
+        self.open()
         self.game_state['sceneAndMoves'].append(
             {'title': title, 'description': description,
              'selectedCardsIndices': [card.index for card in selectedCards],
@@ -213,9 +216,12 @@ class Story:
         with open(STATE_FILE, 'w') as file:
             json.dump(self.game_state, file, indent=4)
 
-    def load(self):
+    def open(self):
         with open(STATE_FILE, 'r') as file:
             self.game_state = json.load(file)
+
+    def load(self):
+        self.open()
 
         for i, card in enumerate(self.game_state['cards']):
             if card['type'] == 'Character':

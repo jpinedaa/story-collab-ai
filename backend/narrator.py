@@ -73,3 +73,4 @@ class Narrator:
             print(s)
             print("----")
         self.story.set_selected_player(final_state["character"])
+        return final_state["character"]

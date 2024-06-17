@@ -36,12 +36,22 @@ class Scene:
         self.moves = []
 
 
+STATE_FILE = 'game_state.json'
 class Story:
     def __init__(self):
         self.characters = []
         self.narratorCards = []
         self.scenes = []
         self.game_state = None
+
+    def check_auto_mode(self):
+        with open(STATE_FILE, 'r') as file:
+            game_state = json.load(file)
+        return game_state['autoMode']
+
+    def set_auto_mode(self, auto_mode):
+        self.game_state['autoMode'] = auto_mode
+        self.save()
 
     def set_selected_player(self, character):
         self.game_state['selectedPlayerIndex'] = (
@@ -200,11 +210,11 @@ class Story:
         return None
 
     def save(self):
-        with open('game_state.json', 'w') as file:
+        with open(STATE_FILE, 'w') as file:
             json.dump(self.game_state, file, indent=4)
 
     def load(self):
-        with open('game_state.json', 'r') as file:
+        with open(STATE_FILE, 'r') as file:
             self.game_state = json.load(file)
 
         for i, card in enumerate(self.game_state['cards']):

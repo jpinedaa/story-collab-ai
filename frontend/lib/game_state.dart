@@ -119,13 +119,13 @@ class GameState with ChangeNotifier {
           .map((card) => CardModel.fromJson(card))
           .toList();
       // Ensure there is a narrator
-      final narrator =
-          players.firstWhere((player) => player.role == 'Narrator', orElse: () {
+      players.firstWhere((player) => player.role == 'Narrator', orElse: () {
         final newNarrator = Player('', 'Narrator', 'Auto');
         players.add(newNarrator);
         return newNarrator;
       });
       selectedPlayer = players[data['selectedPlayerIndex'] as int];
+      isAutoRunning = (data['autoMode'] as int) == 1;
 
       notifyListeners();
     } else {
@@ -151,6 +151,7 @@ class GameState with ChangeNotifier {
           }
         }).toList(),
         'cards': cards.map((card) => card.toJson()).toList(),
+        'autoMode': isAutoRunning ? 1 : 0,
       }),
     );
     if (response.statusCode != 200) {
@@ -161,6 +162,7 @@ class GameState with ChangeNotifier {
 
   void startAutoRun({int intervalSeconds = 1}) {
     isAutoRunning = true;
+    updateGameState();
     http
         .get(Uri.parse(
             'http://127.0.0.1:5000/autorun?selected=${selectedPlayer!.name}'))
@@ -168,6 +170,7 @@ class GameState with ChangeNotifier {
       if (response.statusCode != 200) {
         autoErrorMessage = response.body;
         isAutoRunning = false;
+        updateGameState();
         notifyListeners();
         throw Exception('Failed to make autorun request');
       }
@@ -177,6 +180,7 @@ class GameState with ChangeNotifier {
         fetchGameState();
       } else {
         isAutoRunning = false;
+        updateGameState();
         timer.cancel();
         notifyListeners();
       }
@@ -186,6 +190,7 @@ class GameState with ChangeNotifier {
 
   void stopAutoRun() {
     isAutoRunning = false;
+    updateGameState();
     _timer?.cancel();
     fetchGameState();
     notifyListeners();

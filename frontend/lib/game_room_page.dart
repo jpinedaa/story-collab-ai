@@ -296,6 +296,9 @@ class _GameRoomPageState extends State<GameRoomPage> {
                     }
                   }).toList(),
                 ),
+                const SizedBox(
+                    height:
+                        16.0), // Spacer to ensure scrolling above the button
                 Positioned(
                   bottom: 16.0,
                   left: 16.0,

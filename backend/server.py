@@ -17,6 +17,7 @@ INITIAL_GAME_STATE = {
     "sceneAndMoves": [],
     "cards": [],
     "selectedPlayerIndex": 0,
+    "autoMode": 0,
 }
 
 

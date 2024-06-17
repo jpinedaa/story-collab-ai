@@ -1,8 +1,12 @@
 import json
+import os
 import re
 from langgraph.graph import StateGraph
 from PIL import Image
 import io
+
+
+base_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 def show_graph(graph):

@@ -22,8 +22,8 @@ INITIAL_GAME_STATE = {
 }
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-GAME_STATE_FILE = os.path.join(base_dir, 'game_state.json')
-GAME_STATE_LOCK_FILE = os.path.join(base_dir,'game_state.lock')
+GAME_STATE_FILE = os.path.join(base_dir, './state/game_state.json')
+GAME_STATE_LOCK_FILE = os.path.join(base_dir,'./state/game_state.lock')
 lock = FileLock(GAME_STATE_LOCK_FILE)
 
 
@@ -122,6 +122,8 @@ def handle_autorun():
         return jsonify({"error": str(e)}), 400
     except Exception as e:
         print(traceback.format_exc())
+        if 'Bad Request' in str(e):
+            return jsonify({"error": str(e)}), 500
         return jsonify({"error": 'Internal Error, please try again'}), 500
     return jsonify({"status": "Autorun request received"}), 200
 

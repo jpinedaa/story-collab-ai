@@ -1,3 +1,5 @@
+import random
+
 from cryptography.fernet import Fernet
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
 import json
@@ -5,7 +7,7 @@ import os
 
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-SETTINGS_FILE = os.path.join(base_dir,'settings.json')
+SETTINGS_FILE = os.path.join(base_dir,'./state/settings.json')
 SECRET_KEY = b'sEWCO3d4dV28LBuepu_Cvjjsv61xEawNeMIQA8GwlQI='  # Hardcoded key for encryption
 cipher_suite = Fernet(SECRET_KEY)
 
@@ -34,5 +36,8 @@ def get_model():
     if 'apiKey' in settings:
         os.environ["NVIDIA_API_KEY"] = settings['apiKey']
     if 'model' in settings:
-        return ChatNVIDIA(model=settings['model'])
+        # generate random seed
+        random_seed = random.randint(0, 100000)
+        max_tokens = 4096
+        return ChatNVIDIA(model=settings['model'], seed=random_seed, max_tokens=max_tokens)
     return

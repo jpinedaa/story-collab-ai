@@ -7,3 +7,4 @@ httpx~=1.0.0b0
 cryptography~=42.0.8
 filelock~=3.15.1
 fuzzywuzzy~=0.18.0
+python-Levenshtein~=0.25.1

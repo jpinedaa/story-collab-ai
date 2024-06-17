@@ -1,7 +1,8 @@
 import functools
+import os
 from agents import create_agent, SceneState, SelectionState
 from nodes import narrator_scene_generation_node, narrator_character_selection_node
-from utils import build_graph
+from utils import build_graph, base_dir
 
 class Narrator:
     def __init__(self, story, llm):
@@ -11,15 +12,15 @@ class Narrator:
         self.character_selection_graph = self.build_character_selection_graph()
 
     def build_scene_generation_graph(self):
-        with open("prompts/basic_rules.txt", "r", encoding='utf-8') as f:
+        with open(os.path.join(base_dir, "prompts/basic_rules.txt"), "r", encoding='utf-8') as f:
             basic_rules_prompt = f.read()
 
-        with open("prompts/narrator_scene_generation.txt", "r") as f:
+        with open(os.path.join(base_dir, "prompts/narrator_scene_generation.txt"), "r") as f:
             scene_generation_prompt = f.read()
 
         prompt = basic_rules_prompt + scene_generation_prompt
         agent = create_agent(self.llm, prompt)
-        node = functools.partial(narrator_scene_generation_node, agent=agent)
+        node = functools.partial(narrator_scene_generation_node, agent=agent, story=self.story)
 
         nodes = [("Narrator", node)]
         edges = [("Narrator", lambda s: "continue", {"continue": "__end__"})]
@@ -39,20 +40,21 @@ class Narrator:
             final_state = s['Narrator']
             print(s)
             print("----")
-        self.story.add_scene(final_state["title"], final_state["description"],
-                             final_state["place"], final_state["challenges"],
-                             final_state["pickup_cards"])
+        if self.story.get_auto_mode() == 1:
+            self.story.add_scene(final_state["title"], final_state["description"],
+                                 final_state["place"], final_state["challenges"],
+                                 final_state["pickup_cards"])
 
     def build_character_selection_graph(self):
-        with open("prompts/basic_rules.txt", "r", encoding='utf-8') as f:
+        with open(os.path.join(base_dir, "prompts/basic_rules.txt"), "r", encoding='utf-8') as f:
             basic_rules_prompt = f.read()
 
-        with open("prompts/narrator_character_selection.txt", "r") as f:
+        with open(os.path.join(base_dir, "prompts/narrator_character_selection.txt"), "r") as f:
             character_selection_prompt = f.read()
 
         prompt = basic_rules_prompt + character_selection_prompt
         agent = create_agent(self.llm, prompt)
-        node = functools.partial(narrator_character_selection_node, agent=agent)
+        node = functools.partial(narrator_character_selection_node, agent=agent, story=self.story)
 
         nodes = [("Narrator", node)]
         edges = [("Narrator", lambda s: "continue", {"continue": "__end__"})]
@@ -72,5 +74,6 @@ class Narrator:
             final_state = s['Narrator']
             print(s)
             print("----")
-        self.story.set_selected_player(final_state["character"])
+        if self.story.get_auto_mode() == 1:
+            self.story.set_selected_player(final_state["character"])
         return final_state["character"]

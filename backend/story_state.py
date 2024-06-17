@@ -4,7 +4,7 @@ from fuzzywuzzy import fuzz
 from filelock import FileLock
 
 
-def fuzzy_compare(string1, string2, threshold=60):
+def fuzzy_compare(string1, string2, threshold=85):
     """
     Compare two strings and return True if their similarity ratio
     is above the given threshold, otherwise return False.
@@ -15,7 +15,10 @@ def fuzzy_compare(string1, string2, threshold=60):
     :return: True if similarity ratio is above threshold, else False.
     """
     ratio = fuzz.ratio(string1, string2)
-    return ratio >= threshold
+    overThreshold = ratio >= threshold
+    #if overThreshold:
+        #print(f'fuzzy compare: {string1} and {string2} with ratio {ratio}')
+    return overThreshold
 
 
 class Character:
@@ -54,8 +57,8 @@ class Scene:
 
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-STATE_FILE = os.path.join(base_dir,'game_state.json')
-STATE_LOCK_FILE = os.path.join(base_dir,'game_state.lock')
+STATE_FILE = os.path.join(base_dir,'./state/game_state.json')
+STATE_LOCK_FILE = os.path.join(base_dir,'./state/game_state.lock')
 lock = FileLock(STATE_LOCK_FILE)
 class Story:
     def __init__(self):
@@ -68,7 +71,8 @@ class Story:
         self.open()
         if character == '':
             return self.game_state['players'][0]['status']
-        return self.game_state['players'][self.get_character_by_name(character).index]['status']
+        char = self.get_character_by_name(character)
+        return self.game_state['players'][char.index]['status']
 
     def get_auto_mode(self):
         self.open()
@@ -122,12 +126,34 @@ class Story:
         for challenge in challenge_cards:
             challenges_str += (f'Title: {challenge.title} -'
                                f' Description: {challenge.description}\n')
+            if challenges_dict[challenge.title] == 0:
+                challenges_str += (f'This challenge has not been addressed yet, '
+                                   f'so if you address this challenge, you '
+                                   f'would be the first to, so setup the challenge '
+                                   f'to be completed in the next two moves.\n')
+            if challenges_dict[challenge.title] == 1:
+                challenges_str += (f'This challenge has been addressed once, '
+                                   f'so if you address this challenge, the next '
+                                   f'character that addresses this challenge must '
+                                      f'write an outcome for this challenge'
+                                   f' so setup the challenge for the next character'
+                                   f'to complete it.\n')
             if challenges_dict[challenge.title] == 2:
                 challenges_str += (f'This challenge has been addressed twice, '
                                    f'so if you address this challenge you would '
-                                   f'complete and thus must write an outcome for '
-                                   f'this challenge.\n')
+                                   f'complete it! and thus must write an outcome for '
+                                   f'this challenge, this outcome affects you and '
+                                   f'the rest of the characters and advances the '
+                                   f'story for the next scene!.'
+                                   f'include outcome: OUTCOME inside the description string.\n')
         return challenges_str
+
+    def is_narrator_card_available(self, title):
+        narrator_selected_cards = self.get_narrator_selected_cards()
+        for card in self.narratorCards:
+            if fuzzy_compare(card.title, title) and card.index not in {c.index for c in narrator_selected_cards}:
+                return True
+        return False
 
     def get_narrator_available_cards_str(self):
         narrator_selected_cards = self.get_narrator_selected_cards()
@@ -154,7 +180,7 @@ class Story:
     def get_story_str(self):
         story_str = 'The current story is: \n'
         if len(self.scenes) == 0:
-            return 'No scenes have been written yet.'
+            return 'No scenes have been written yet.\n'
 
         for scene in self.scenes:
             story_str += "New Scene: \n"
@@ -301,37 +327,32 @@ class Story:
     def load(self):
         self.open()
 
-        for i, card in enumerate(self.game_state['cards']):
-            if card['type'] == 'Character':
-                if card['playerStatus'] != 'NPC':
-                    character = Character(card['title'], card['description'], card['playerStatus'])
-                    self.characters.append(character)
-                    continue
-                if card['playerStatus'] == 'NPC':
-                    card = Card(card['title'], card['description'], card['type'], i)
-                    self.narratorCards.append(card)
-                    continue
-            if card['type'] == 'Obstacle' or card['type'] == 'Place':
-                card = Card(card['title'], card['description'], card['type'], i)
-                self.narratorCards.append(card)
-
         for i, player in enumerate(self.game_state['players']):
             if player['role'] == 'Narrator':
+                for ind in player['cardsIndices']:
+                    card_dict = self.game_state['cards'][ind]
+                    if card_dict['type'] == 'Character' and card_dict['playerStatus'] != 'NPC':
+                        continue
+                    card = Card(card_dict['title'], card_dict['description'],
+                                card_dict['type'], ind)
+                    self.narratorCards.append(card)
                 continue
-            char = self.get_character_by_name(player['name'])
-            char.index = i
+
+            char_card_dict = self.game_state['cards'][player['cardIndex']]
+            character = Character(char_card_dict['title'], char_card_dict['description'],
+                                  char_card_dict['playerStatus'], i) # char index is the player index
+            self.characters.append(character)
 
             for ind in player['cardsIndices']:
-                card_dict = self.game_state['cards'][ind]
-                card = Card(card_dict['title'], card_dict['description'], card_dict['type'], ind)
-                char.cards.append(card)
+                card = Card(self.game_state['cards'][ind]['title'], self.game_state['cards'][ind]['description'],self.game_state['cards'][ind]['type'], ind)
+                character.cards.append(card)
 
         for i, sceneOrMove in enumerate(self.game_state['sceneAndMoves']):
             if 'title' in sceneOrMove:
                 challenges = []
                 pickupCards = []
                 place = None
-                for ind in self.game_state['sceneAndMoves'][i]['selectedCardsIndices']:
+                for ind in sceneOrMove['selectedCardsIndices']:
                     card_dict = self.game_state['cards'][ind]
                     card = Card(card_dict['title'], card_dict['description'], card_dict['type'], ind)
                     if card_dict['type'] == 'Character' or card_dict['type'] == 'Obstacle':
@@ -358,10 +379,23 @@ class Story:
                     scene.moves.append(move)
                     j += 1
                 self.scenes.append(scene)
+    def fix_indices(self):
+        self.open()
+        for i, player in enumerate(self.game_state['players']):
+            new_cards_indices = []
+            for ind in player['cardsIndices']:
+                if ind >= 100:
+                    ind -= 1
+                new_cards_indices.append(ind)
+                self.game_state['players'][i]['cardsIndices'] = new_cards_indices
+            if player['cardIndex'] and player['cardIndex'] >= 100:
+                self.game_state['players'][i]['cardIndex'] -= 1
+        self.save()
 
 
 if __name__ == "__main__":
     story = Story()
+    #story.fix_indices()
     story.load()
     print('-----------------------------------------------------------------------------Characters:')
     for character in story.characters:

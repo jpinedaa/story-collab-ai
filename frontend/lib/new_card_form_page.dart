@@ -6,7 +6,7 @@ import 'card_creation_page.dart';
 import 'scene_display_page.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
-import 'package:image_compression/image_compression.dart';
+//import 'package:image_compression/image_compression.dart';
 import 'package:image/image.dart' as img;
 
 class NewCardFormPage extends StatefulWidget {

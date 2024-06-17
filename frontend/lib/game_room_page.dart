@@ -226,79 +226,82 @@ class _GameRoomPageState extends State<GameRoomPage> {
                 ListView(
                   controller: _scrollController,
                   padding: const EdgeInsets.all(8.0),
-                  children: gameState.sceneAndMoves.map<Widget>((item) {
-                    if (item is SceneComponent) {
-                      return BaseContainer(
-                        title: item.title,
-                        content: item.description,
-                        placeCard: item.placeCardIndex != null
-                            ? gameState.cards[item.placeCardIndex!]
-                            : null,
-                        selectedCards: item.selectedCardsIndices
-                            .map((ind) => gameState.cards[ind])
-                            .toList(),
-                        disableEdit: gameState.sceneAndMoves.indexOf(item) !=
-                                    gameState.sceneAndMoves.length - 1 ||
-                                gameState.isAutoRunning
-                            ? true
-                            : false,
-                        child: IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () {
-                            gameState.selectPlayer(gameState.players.firstWhere(
-                                (player) => player.role == 'Narrator'));
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    SceneDisplayPage(sceneComponent: item),
-                              ),
-                            );
+                  children: [
+                    ...gameState.sceneAndMoves.map<Widget>((item) {
+                      if (item is SceneComponent) {
+                        return BaseContainer(
+                          title: item.title,
+                          content: item.description,
+                          placeCard: item.placeCardIndex != null
+                              ? gameState.cards[item.placeCardIndex!]
+                              : null,
+                          selectedCards: item.selectedCardsIndices
+                              .map((ind) => gameState.cards[ind])
+                              .toList(),
+                          disableEdit: gameState.sceneAndMoves.indexOf(item) !=
+                                      gameState.sceneAndMoves.length - 1 ||
+                                  gameState.isAutoRunning
+                              ? true
+                              : false,
+                          child: IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () {
+                              gameState.selectPlayer(gameState.players
+                                  .firstWhere(
+                                      (player) => player.role == 'Narrator'));
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      SceneDisplayPage(sceneComponent: item),
+                                ),
+                              );
+                            },
+                          ),
+                          onDelete: () {
+                            gameState.deleteItem(item);
                           },
-                        ),
-                        onDelete: () {
-                          gameState.deleteItem(item);
-                        },
-                      );
-                    } else {
-                      return BaseContainer(
-                        title: 'Move by ${item.character}',
-                        content: item.description,
-                        selectedCards: item.selectedCardsIndices
-                            .map((ind) => gameState.cards[ind])
-                            .toList()
-                            .cast<CardModel>(),
-                        isMove: true,
-                        disableEdit: gameState.sceneAndMoves.indexOf(item) !=
-                                    gameState.sceneAndMoves.length - 1 ||
-                                gameState.isAutoRunning
-                            ? true
-                            : false,
-                        child: IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-                          onPressed: () {
-                            gameState.selectPlayer(gameState.players.firstWhere(
-                                (player) => player.name == item.character));
+                        );
+                      } else {
+                        return BaseContainer(
+                          title: 'Move by ${item.character}',
+                          content: item.description,
+                          selectedCards: item.selectedCardsIndices
+                              .map((ind) => gameState.cards[ind])
+                              .toList()
+                              .cast<CardModel>(),
+                          isMove: true,
+                          disableEdit: gameState.sceneAndMoves.indexOf(item) !=
+                                      gameState.sceneAndMoves.length - 1 ||
+                                  gameState.isAutoRunning
+                              ? true
+                              : false,
+                          child: IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () {
+                              gameState.selectPlayer(gameState.players
+                                  .firstWhere((player) =>
+                                      player.name == item.character));
 
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    MoveEditorPage(move: item),
-                              ),
-                            );
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      MoveEditorPage(move: item),
+                                ),
+                              );
+                            },
+                          ),
+                          onDelete: () {
+                            gameState.deleteItem(item);
                           },
-                        ),
-                        onDelete: () {
-                          gameState.deleteItem(item);
-                        },
-                      );
-                    }
-                  }).toList(),
+                        );
+                      }
+                    }),
+                    // Add a SizedBox at the end to create space
+                    const SizedBox(height: 40.0),
+                  ],
                 ),
-                const SizedBox(
-                    height:
-                        16.0), // Spacer to ensure scrolling above the button
                 Positioned(
                   bottom: 16.0,
                   left: 16.0,

@@ -17,7 +17,7 @@ Narrators have three kinds of cards, which they use to establish each scene of t
 Place: The locations where each scene unfolds in your story.
 Character: People in the story who challenge the players or want something from them.
 Obstacle: Anything else in the story that challenges or hinders the players.
-####Character Cards
+#### Character Cards
 Characters have six kinds of cards, which describe their actions in the story and help them overcome the narrator’s challenges:
 
 Nature: A character’s background or origin.

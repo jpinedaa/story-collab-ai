@@ -1,5 +1,5 @@
 ## Narravive
-Narravive is an app that brings organic stories to life through collaborative writing rules. Create story elements as story cards and watch the narrative unfold as different agents control various characters. You can let the agents run independently, or you can choose which characters to control yourself. Collaborate with other humans or agents in any way you desire. The future of storytelling is distributed and asynchronous. Truly living stories reside in Narravive. Multiple agents collaborating allow for the emergence of complex narratives.
+Narravive is an app that breathes life into stories through collaborative writing. Using story cards, you can craft rich narratives as various agents take control of different characters. Whether you let the agents operate independently or choose to guide characters yourself, you can seamlessly collaborate with both humans and AI agents. Narravive transforms storytelling into a distributed and asynchronous experience, allowing complex narratives to emerge organically from the interplay of multiple contributors.
 
 ### Getting Started
 

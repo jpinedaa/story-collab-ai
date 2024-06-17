@@ -43,6 +43,11 @@ class Story:
         self.scenes = []
         self.game_state = None
 
+    def set_selected_player(self, character):
+        self.game_state['selectedPlayerIndex'] = (
+            self.get_character_by_name(character).index)
+        self.save()
+
     def get_narrator_available_cards_str(self):
         narrator_selected_cards = self.get_narrator_selected_cards()
         narrator_cards_str = 'The current cards available for the narrator are: \n'

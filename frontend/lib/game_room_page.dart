@@ -16,6 +16,7 @@ class GameRoomPage extends StatefulWidget {
   const GameRoomPage({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _GameRoomPageState createState() => _GameRoomPageState();
 }
 
@@ -347,14 +348,15 @@ class PlayerCard extends StatefulWidget {
   final Function(CardModel?) showCard;
 
   const PlayerCard({
-    Key? key,
+    super.key,
     required this.player,
     required this.gameState,
     required this.isSelected,
     required this.showCard,
-  }) : super(key: key);
+  });
 
   @override
+  // ignore: library_private_types_in_public_api
   _PlayerCardState createState() => _PlayerCardState();
 }
 

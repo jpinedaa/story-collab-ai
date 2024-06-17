@@ -36,3 +36,7 @@ class MoveState(TypedDict):
     challenges: list[str]
     played: list[str]
     pickup_cards: list[str]
+
+class SelectionState(TypedDict):
+    messages: Annotated[Sequence[BaseMessage], operator.add]
+    character: str

@@ -16,8 +16,10 @@ class StoryRun:
     def run(self):
         if len(self.story.scenes) == 0 or self.current == "":
             self.narrator.generate_next_scene()
+            self.narrator.choose_next_character()
         else:
             self.character.generate_next_scene(self.current)
+            self.narrator.choose_next_character()
 
 
 if __name__ == "__main__":

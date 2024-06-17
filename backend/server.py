@@ -16,6 +16,7 @@ INITIAL_GAME_STATE = {
     "players": [],
     "sceneAndMoves": [],
     "cards": [],
+    "selectedPlayerIndex": 0,
 }
 
 

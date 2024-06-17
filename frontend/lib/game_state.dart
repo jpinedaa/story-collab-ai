@@ -125,8 +125,7 @@ class GameState with ChangeNotifier {
         players.add(newNarrator);
         return newNarrator;
       });
-      // Select the narrator by default
-      selectPlayer(narrator);
+      selectedPlayer = players[data['selectedPlayerIndex'] as int];
 
       notifyListeners();
     } else {
@@ -142,6 +141,7 @@ class GameState with ChangeNotifier {
       Uri.parse(url),
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
+        'selectedPlayerIndex': players.indexOf(selectedPlayer!),
         'players': players.map((player) => player.toJson()).toList(),
         'sceneAndMoves': sceneAndMoves.map((item) {
           if (item is SceneComponent) {
@@ -231,6 +231,7 @@ class GameState with ChangeNotifier {
 
   void selectPlayer(Player player) {
     selectedPlayer = player;
+    updateGameState();
     notifyListeners();
   }
 

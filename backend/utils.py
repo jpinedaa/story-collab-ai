@@ -74,6 +74,31 @@ def parse_move_generation(output):
         "No valid JSON object with the required structure found in the LLM output.")
 
 
+def parse_character_selection(output):
+    # Regular expression pattern to match JSON object
+    json_pattern = re.compile(r'\{(?:[^{}]|(?:\{[^{}]*\}))*\}')
+
+    # Find all JSON objects in the output
+    json_matches = json_pattern.findall(output)
+
+    if not json_matches:
+        raise ValueError("No JSON object found in the LLM output.")
+
+    for match in json_matches:
+        try:
+            # Attempt to load the JSON object
+            parsed_output = json.loads(match)
+
+            # Verify the structure of the parsed output
+            if "character" in parsed_output:
+                return parsed_output['character']
+        except json.JSONDecodeError:
+            continue
+
+    raise ValueError(
+        "No valid JSON object with the required structure found in the LLM output.")
+
+
 def build_graph(state_class, nodes, edges, entry_point):
     workflow = StateGraph(state_class)
 

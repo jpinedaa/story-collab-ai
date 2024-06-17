@@ -1,5 +1,5 @@
 ## Narravive
-Narravive is an app that brings organic stories to life through collaborative writing rules. Create story elements as story cards and watch the narrative unfold as different agents control various characters. You can let the agents run independently, or you can choose which characters to control yourself. Collaborate with other humans or agents in any way you desire. The future of storytelling is dynamic and unpredictable. Truly living stories reside in Narravive. Multiple agents collaborating allow for the emergence of complex behaviors that arise naturally.
+Narravive is an app that brings organic stories to life through collaborative writing rules. Create story elements as story cards and watch the narrative unfold as different agents control various characters. You can let the agents run independently, or you can choose which characters to control yourself. Collaborate with other humans or agents in any way you desire. The future of storytelling is distributed and asynchronous. Truly living stories reside in Narravive. Multiple agents collaborating allow for the emergence of complex narratives.
 
 ### Getting Started
 
@@ -32,42 +32,44 @@ Stories unfold as a series of scenes. When starting a new scene, the narrator cr
 
 Character Cards: Represent people who confront the characters or want something from them.
 Obstacle Cards: Represent anything else that gets in the characters’ way.
-Every challenge has an initial counter of three (3) moves that characters need to play to overcome the challenge. Once the narrator has played their cards, they write a brief description of the situation, setting the stage.
+Every challenge has an initial counter of three (3) moves that characters need to play to overcome the challenge. 
+Once the narrator has played their cards, they write a brief description of the situation, setting the stage.
+The narrator can also leave pickup cards in the scene that the character can take and play to overcome challenges.
 
 ##### Moves
+
 After the scene has started, the characters make one or more moves by playing their cards to show how they overcome the narrator's challenges. These cards include:
 
 Strength and Weakness Cards: Represent the abilities or shortcomings that set your character apart.
 Subplot: Describes a character's motivation.
 Assets: Valuable things or knowledge that give characters an edge.
 Goals: Tasks or objectives that players can choose to take on for a reward.
-Winning Control of the Story
+
+Once a card has been played it can't be used anymore, you can create new cards at any point or pickup cards from the scene left by the narrator.
+
+##### Winning Control of the Story
 Playing these cards helps overcome the narrator’s challenges and earns you the chance to win control of the story. This means you can write how the challenge turns out, using “outcomes” guided by the challenge card.
 
 ##### Advancing the Story
 Once all the scene’s challenges have been overcome, the scene is complete. The narrator can then start the next one by adding new challenges.
+
+### Auto Mode
+* Order: Determined by the narrator.
+* Turns: When a character or narrator runs out of cards to play, the turn stops. Auto mode stops when a manual character or narrator turn occurs.
 
 #### Notes
 * Create Cards First: Before you can start playing, you need to create your story and character cards.
 * Edit Rules: You can only edit the last scene or move.
 * Simplified Rules:
 * Scenes: A scene is composed of a narrator's component followed by moves.
-* Pickup Cards: Taken from scene cards and used in moves.
-* Challenge Cards: Have outcome descriptions and require 3 moves to be finished. They can't be selected anymore once completed.
-* Card Requirement: To address challenges, use weakness, strength, goal, asset, nature, or subplot cards. Whoever finishes the challenge can write the outcome.
-### Auto Mode
-* Order: Determined by the narrator.
-* Turns: When a character or narrator runs out of cards to play, the turn stops. Auto mode stops when a manual character or narrator turn occurs.
+
 ### Technology Integration
 Narravive integrates advanced technologies for a seamless storytelling experience:
-
 * Langchain Nvidia Chat: For interactive conversations.
 * NIMS Endpoints: For robust backend support.
 * Model Selection: Choose the best models for your needs.
 * API Key Encryption: Ensures security for your keys.
 * Langgraph: Facilitates modularizable agents.
-### Example
-Check out this example from Storium — "Monster Academy" for inspiration on how collaborative storytelling can unfold.
 
 Conclusion
 Narravive offers a unique platform for dynamic, collaborative storytelling. Whether you're controlling characters or letting AI agents drive the narrative, the stories created are truly living and organic. Join us in this innovative approach to storytelling and witness the future of narrative unfold.

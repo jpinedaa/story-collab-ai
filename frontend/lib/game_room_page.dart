@@ -449,7 +449,7 @@ class _PlayerCardState extends State<PlayerCard> {
                   gameState.cards[player.cardIndex!].imageBytes != null) ...[
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 8.0),
-                  height: 80,
+                  height: 70,
                   width: double.infinity,
                   child: Align(
                     alignment: Alignment.center,

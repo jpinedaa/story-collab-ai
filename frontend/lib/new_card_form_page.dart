@@ -7,6 +7,7 @@ import 'scene_display_page.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
 import 'package:image_compression/image_compression.dart';
+import 'package:image/image.dart' as img;
 
 class NewCardFormPage extends StatefulWidget {
   final CardModel? card;
@@ -32,6 +33,7 @@ class NewCardFormPageState extends State<NewCardFormPage> {
   String? _selectedPlayerStatus;
   Uint8List? _imageBytes;
   bool _isCompressing = false;
+  bool isSaving = false;
 
   @override
   void initState() {
@@ -45,6 +47,12 @@ class NewCardFormPageState extends State<NewCardFormPage> {
     } else if (widget.preselectedCardType != null) {
       _selectedCardType = widget.preselectedCardType.toString();
     }
+  }
+
+  Future<void> save() async {
+    setState(() {
+      isSaving = true;
+    });
   }
 
   Future<void> _pickImage() async {
@@ -70,18 +78,34 @@ class NewCardFormPageState extends State<NewCardFormPage> {
     }
   }
 
-  Future<Uint8List> compressImage(Uint8List bytes) async {
-    final input = ImageFile(
-      rawBytes: bytes,
-      filePath: '', // optional: file path can be empty for web
-    );
-    const config = Configuration(
-      jpgQuality: 1,
-    );
-    final imgconfig = ImageFileConfiguration(input: input, config: config);
+  // Future<Uint8List> compressImage(Uint8List bytes) async {
+  //   final input = ImageFile(
+  //     rawBytes: bytes,
+  //     filePath: '', // optional: file path can be empty for web
+  //   );
+  //   const config = Configuration(
+  //     jpgQuality: 5,
+  //   );
+  //   final imgconfig = ImageFileConfiguration(input: input, config: config);
 
-    final compressedFile = await compressInQueue(imgconfig);
-    return compressedFile.rawBytes;
+  //   final compressedFile = await compressInQueue(imgconfig);
+  //   return compressedFile.rawBytes;
+  // }
+
+  Future<Uint8List> compressImage(Uint8List bytes,
+      {int targetWidth = 800, int targetHeight = 600}) async {
+    // Decode the image
+    img.Image image = img.decodeImage(bytes)!;
+
+    // Resize the image
+    img.Image resizedImage =
+        img.copyResize(image, width: targetWidth, height: targetHeight);
+
+    // Compress the resized image
+    Uint8List compressedBytes =
+        Uint8List.fromList(img.encodeJpg(resizedImage, quality: 85));
+
+    return compressedBytes;
   }
 
   @override
@@ -257,64 +281,69 @@ class NewCardFormPageState extends State<NewCardFormPage> {
                 ),
               ),
               const SizedBox(height: 16.0),
-              ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState?.validate() ?? false) {
-                    _formKey.currentState?.save();
-                    final newCard = CardModel(
-                      title: _title,
-                      description: _description,
-                      type: CardType.values.firstWhere(
-                        (e) => e.toString() == _selectedCardType,
-                      ),
-                      playerStatus:
-                          _selectedCardType == CardType.Character.toString() &&
-                                  player.role == 'Narrator'
-                              ? PlayerStatus.values.firstWhere(
-                                  (e) => e.toString() == _selectedPlayerStatus,
-                                )
-                              : null,
-                      imageBytes: _imageBytes,
-                    );
-                    if (widget.card == null) {
-                      gameState.addCard(newCard);
-                      player.cardsIndices = List.from(player.cardsIndices)
-                        ..add(gameState.cards.indexOf(newCard));
-                      if (newCard.type == CardType.Character) {
-                        final newPlayer = Player(
-                            newCard.title,
-                            'Character',
-                            newCard.playerStatus?.toString().split('.').last ??
-                                'Manual',
-                            cardIndex: gameState.cards.indexOf(newCard));
-                        gameState.addPlayer(newPlayer);
-                      }
-                    } else {
-                      gameState.updateCard(widget.card!, newCard);
-                    }
-                    gameState.updateGameState().then((_) {
-                      if (widget.fromSceneEditor) {
-                        Navigator.pop(context); // Pop the form page
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SceneDisplayPage(),
-                          ),
-                        );
-                      } else {
-                        Navigator.pop(context); // Pop the form page
-                        Navigator.pop(context); // Pop back to CardCreationPage
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const CardCreationPage()),
-                        );
-                      }
-                    });
-                  }
-                },
-                child: const Text('Save'),
-              ),
+              !isSaving
+                  ? ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState?.validate() ?? false) {
+                          _formKey.currentState?.save();
+                          save();
+                          final newCard = CardModel(
+                            title: _title,
+                            description: _description,
+                            type: CardType.values.firstWhere(
+                              (e) => e.toString() == _selectedCardType,
+                            ),
+                            playerStatus: _selectedCardType ==
+                                        CardType.Character.toString() &&
+                                    player.role == 'Narrator'
+                                ? PlayerStatus.values.firstWhere(
+                                    (e) =>
+                                        e.toString() == _selectedPlayerStatus,
+                                  )
+                                : null,
+                            imageBytes: _imageBytes,
+                          );
+                          if (widget.card == null) {
+                            gameState.addCard(newCard);
+                            player.cardsIndices = List.from(player.cardsIndices)
+                              ..add(gameState.cards.indexOf(newCard));
+                            if (newCard.type == CardType.Character &&
+                                newCard.playerStatus != PlayerStatus.NPC) {
+                              final newPlayer = Player(newCard.title,
+                                  'Character', newCard.playerStatus!.name,
+                                  cardIndex: gameState.cards.indexOf(newCard));
+                              gameState.addPlayer(newPlayer);
+                            }
+                          } else {
+                            gameState.updateCard(widget.card!, newCard);
+                          }
+                          gameState.updateGameState().then((_) {
+                            if (widget.fromSceneEditor) {
+                              Navigator.pop(context); // Pop the form page
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const SceneDisplayPage(),
+                                ),
+                              );
+                            } else {
+                              Navigator.pop(context); // Pop the form page
+                              Navigator.pop(
+                                  context); // Pop back to CardCreationPage
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>
+                                        const CardCreationPage()),
+                              );
+                            }
+                          });
+                        }
+                      },
+                      child: const Text('Save'),
+                    )
+                  : const Text('Saving...'),
             ],
           ),
         ),

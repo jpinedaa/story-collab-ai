@@ -31,7 +31,8 @@ class Character:
         initial_state = MoveState()
         initial_state["messages"] = [self.story.get_characters_str() +
                                      self.story.get_story_str() +
-                                     self.story.get_character_available_cards_str(character)]
+                                     self.story.get_character_available_cards_str(character) +
+                                     self.story.get_active_challenges_str()]
         events = self.move_generation_graph.stream(initial_state, {"recursion_limit": 150})
         final_state = None
         for s in events:

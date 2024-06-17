@@ -145,23 +145,33 @@ class CardDetailDialog extends StatelessWidget {
                         child: Row(
                           children: [
                             IconButton(
-                              icon: Icon(Icons.edit,
-                                  color:
-                                      !isCardUsed ? Colors.blue : Colors.grey),
-                              onPressed: !isCardUsed
-                                  ? () {
-                                      Navigator.pop(
-                                          context); // Close the dialog
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              NewCardFormPage(card: card),
-                                        ),
-                                      );
-                                    }
-                                  : null,
+                              icon: const Icon(Icons.edit, color: Colors.blue),
+                              onPressed: () {
+                                Navigator.pop(context); // Close the dialog
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        NewCardFormPage(card: card),
+                                  ),
+                                );
+                              },
                             ),
+                            IconButton(
+                                onPressed: () {
+                                  CardModel duplicateCard = CardModel(
+                                      title: card.title,
+                                      description: card.description,
+                                      type: card.type);
+                                  gameState.addCard(duplicateCard);
+                                  gameState.selectedPlayer!.cardsIndices.add(
+                                      gameState.cards.indexOf(duplicateCard));
+                                },
+                                icon: const Icon(
+                                  Icons.plus_one,
+                                  color: Colors.green,
+                                  size: 30,
+                                )),
                             IconButton(
                               icon: Icon(Icons.delete,
                                   color:

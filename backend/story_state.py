@@ -1,4 +1,21 @@
 import json
+import os
+from fuzzywuzzy import fuzz
+from filelock import FileLock
+
+
+def fuzzy_compare(string1, string2, threshold=80):
+    """
+    Compare two strings and return True if their similarity ratio
+    is above the given threshold, otherwise return False.
+
+    :param string1: The first string to compare.
+    :param string2: The second string to compare.
+    :param threshold: The similarity ratio threshold (default is 80).
+    :return: True if similarity ratio is above threshold, else False.
+    """
+    ratio = fuzz.ratio(string1, string2)
+    return ratio >= threshold
 
 
 class Character:
@@ -36,13 +53,22 @@ class Scene:
         self.moves = []
 
 
-STATE_FILE = 'game_state.json'
+base_dir = os.path.dirname(os.path.abspath(__file__))
+STATE_FILE = os.path.join(base_dir,'game_state.json')
+STATE_LOCK_FILE = os.path.join(base_dir,'game_state.lock')
+lock = FileLock(STATE_LOCK_FILE)
 class Story:
     def __init__(self):
         self.characters = []
         self.narratorCards = []
         self.scenes = []
         self.game_state = None
+
+    def get_player_status(self, character):
+        self.open()
+        if character == '':
+            return self.game_state['players'][0]['status']
+        return self.game_state['players'][self.get_character_by_name(character).index]['status']
 
     def get_auto_mode(self):
         self.open()
@@ -58,6 +84,50 @@ class Story:
         self.game_state['selectedPlayerIndex'] = (
             self.get_character_by_name(character).index)
         self.save()
+
+    def does_narrator_have_available_challenge_cards(self):
+        narrator_selected_cards = self.get_narrator_selected_cards()
+        for card in self.narratorCards:
+            if card.index not in {c.index for c in narrator_selected_cards} and (card.type == 'Character' or card.type == 'Obstacle'):
+                return True
+        return False
+
+    def does_character_have_available_cards(self, character):
+        character_obj = self.get_character_by_name(character)
+        character_selected_cards = self.get_character_selected_cards(character_obj)
+        for card in character_obj.cards:
+            if card.index not in {c.index for c in character_selected_cards}:
+                return True
+        return False
+
+    def get_active_challenges(self):
+        challenges = {}
+        for challenge in self.scenes[-1].challenges:
+            challenges[challenge.title] = 0
+        for move in self.scenes[-1].moves:
+            for challenge in move.challenge:
+                challenges[challenge.title] += 1
+        return [challenge for challenge in challenges if challenges[challenge] < 3], challenges
+
+    def get_challenge_card_by_title(self, title):
+        for card in self.narratorCards:
+            if fuzzy_compare(card.title, title, threshold=80) and card.type != 'Place':
+                return card
+        return None
+
+    def get_active_challenges_str(self):
+        challenges, challenges_dict = self.get_active_challenges()
+        challenges_str = 'The current active challenges are: \n'
+        challenge_cards = [self.get_challenge_card_by_title(challenge) for challenge in challenges]
+        for challenge in challenge_cards:
+            challenges_str += (f'Title: {challenge.title} -'
+                               f' Description: {challenge.description}\n')
+            if challenges_dict[challenge.title] == 2:
+                challenges_str += (f'This challenge has been addressed twice, '
+                                   f'so if you address this challenge you would '
+                                   f'complete and thus must write an outcome for '
+                                   f'this challenge.\n')
+        return challenges_str
 
     def get_narrator_available_cards_str(self):
         narrator_selected_cards = self.get_narrator_selected_cards()
@@ -114,12 +184,18 @@ class Story:
         character_cards_str = f'You control {character} and your current cards available are: \n'
         selected_indices = [c.index for c in character_selected_cards]
         count = 0
+        output_cards = []
         for card in character_obj.cards:
             if card.index in selected_indices:
                 continue
-            character_cards_str += (f'Title: {card.title} -'
+            curr_str = (f'Title: {card.title} -'
                                     f' Description: {card.description} -'
                                     f' Type: {card.type}\n')
+            if curr_str in output_cards:
+                continue
+            character_cards_str += curr_str
+            output_cards.append(curr_str)
+
             count += 1
         if count == 0:
             character_cards_str += 'No cards available.'
@@ -129,13 +205,13 @@ class Story:
         selectedCards = []
         for scene in self.scenes:
             for move in scene.moves:
-                if move.character == character.name:
+                if fuzzy_compare(move.character, character.name, threshold=80):
                     selectedCards += move.cardsPlayed
         return selectedCards
 
     def get_unselected_character_card(self, character, title):
         for card in character.cards:
-            if card.title == title and card not in self.get_character_selected_cards(character):
+            if fuzzy_compare(card.title, title, threshold=80) and card not in self.get_character_selected_cards(character):
                 return card
 
     def add_move(self, character, description, challenges, cardsPlayed, pickupCards):
@@ -166,7 +242,7 @@ class Story:
 
     def get_narrator_card_by_title(self, title):
         for card in self.narratorCards:
-            if card.title == title:
+            if fuzzy_compare(card.title, title, threshold=80):
                 return card
         return None
 
@@ -190,35 +266,37 @@ class Story:
 
     def get_place_by_title(self, title):
         for card in self.narratorCards:
-            if card.type == 'Place' and card.title == title:
+            if card.type == 'Place' and fuzzy_compare(card.title, title, threshold=80):
                 return card
         return None
 
     def get_narrator_selected_cards(self):
         selectedCards = []
         for scene in self.scenes:
-            selectedCards.append(scene.challenges)
-            selectedCards.append(scene.pickupCards)
+            selectedCards += scene.challenges
+            selectedCards += scene.pickupCards
         return selectedCards
 
     def get_unselected_narrator_card(self, title):
         for card in self.narratorCards:
-            if card.title == title and card not in self.get_narrator_selected_cards():
+            if fuzzy_compare(card.title, title, threshold=80) and card not in self.get_narrator_selected_cards():
                 return card
 
     def get_character_by_name(self, name):
         for character in self.characters:
-            if character.name == name:
+            if fuzzy_compare(character.name, name, threshold=80):
                 return character
         return None
 
     def save(self):
-        with open(STATE_FILE, 'w') as file:
-            json.dump(self.game_state, file, indent=4)
+        with lock.acquire():
+            with open(STATE_FILE, 'w') as file:
+                json.dump(self.game_state, file, indent=4)
 
     def open(self):
-        with open(STATE_FILE, 'r') as file:
-            self.game_state = json.load(file)
+        with lock.acquire():
+            with open(STATE_FILE, 'r') as file:
+                self.game_state = json.load(file)
 
     def load(self):
         self.open()
@@ -226,7 +304,7 @@ class Story:
         for i, card in enumerate(self.game_state['cards']):
             if card['type'] == 'Character':
                 if card['playerStatus'] != 'NPC':
-                    character = Character(card['title'], card['description'], card['playerStatus'], i)
+                    character = Character(card['title'], card['description'], card['playerStatus'])
                     self.characters.append(character)
                     continue
                 if card['playerStatus'] == 'NPC':
@@ -237,14 +315,16 @@ class Story:
                 card = Card(card['title'], card['description'], card['type'], i)
                 self.narratorCards.append(card)
 
-        for player in self.game_state['players']:
+        for i, player in enumerate(self.game_state['players']):
             if player['role'] == 'Narrator':
                 continue
+            char = self.get_character_by_name(player['name'])
+            char.index = i
 
             for ind in player['cardsIndices']:
                 card_dict = self.game_state['cards'][ind]
                 card = Card(card_dict['title'], card_dict['description'], card_dict['type'], ind)
-                self.get_character_by_name(player['name']).cards.append(card)
+                char.cards.append(card)
 
         for i, sceneOrMove in enumerate(self.game_state['sceneAndMoves']):
             if 'title' in sceneOrMove:

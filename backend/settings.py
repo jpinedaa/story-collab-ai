@@ -4,7 +4,8 @@ import json
 import os
 
 
-SETTINGS_FILE = 'settings.json'
+base_dir = os.path.dirname(os.path.abspath(__file__))
+SETTINGS_FILE = os.path.join(base_dir,'settings.json')
 SECRET_KEY = b'sEWCO3d4dV28LBuepu_Cvjjsv61xEawNeMIQA8GwlQI='  # Hardcoded key for encryption
 cipher_suite = Fernet(SECRET_KEY)
 

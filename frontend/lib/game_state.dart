@@ -125,7 +125,6 @@ class GameState with ChangeNotifier {
         return newNarrator;
       });
       selectedPlayer = players[data['selectedPlayerIndex'] as int];
-      print('autoMode: ${data['autoMode']}');
       isAutoRunning = (data['autoMode'] as int) == 1;
 
       notifyListeners();
@@ -137,7 +136,6 @@ class GameState with ChangeNotifier {
   Future<void> updateGameState([String? path]) async {
     // Construct the URL with the optional path parameter
     final url = path != null ? '$backendUrl?path=$path' : backendUrl;
-    print('updating automode: $isAutoRunning ');
 
     final response = await http.post(
       Uri.parse(url),
@@ -156,7 +154,6 @@ class GameState with ChangeNotifier {
         'autoMode': isAutoRunning ? 1 : 0,
       }),
     );
-    print('updated automode: $isAutoRunning ');
     if (response.statusCode != 200) {
       throw Exception('Failed to update game state');
     }
@@ -173,7 +170,7 @@ class GameState with ChangeNotifier {
             'http://127.0.0.1:5000/autorun?selected=${selectedPlayer!.name}'))
         .then((response) {
       if (response.statusCode != 200) {
-        autoErrorMessage = response.body;
+        autoErrorMessage = json.decode(response.body)['error'];
         isAutoRunning = false;
         updateGameState();
         notifyListeners();
@@ -305,6 +302,20 @@ class GameState with ChangeNotifier {
     final index = cards.indexOf(oldCard);
     if (index != -1) {
       cards[index] = newCard;
+      Player? player;
+      for (Player p in players) {
+        if (p.cardIndex == index) {
+          player = p;
+          break;
+        }
+      }
+      if (player != null) {
+        final newPlayer = Player(
+            newCard.title, 'Character', newCard.playerStatus!.name,
+            cardIndex: cards.indexOf(newCard));
+        players[players.indexOf(player)] = newPlayer;
+      }
+
       updateGameState();
       notifyListeners();
     }

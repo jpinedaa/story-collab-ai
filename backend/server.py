@@ -2,12 +2,13 @@ import json
 import os
 import re
 import traceback
-
+from filelock import FileLock
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from story_run import StoryRun
 from settings import encrypt_data, decrypt_data, SETTINGS_FILE
 
+from story_run import ManualModeError
 
 app = Flask(__name__)
 CORS(app)
@@ -20,6 +21,11 @@ INITIAL_GAME_STATE = {
     "autoMode": 0,
 }
 
+base_dir = os.path.dirname(os.path.abspath(__file__))
+GAME_STATE_FILE = os.path.join(base_dir, 'game_state.json')
+GAME_STATE_LOCK_FILE = os.path.join(base_dir,'game_state.lock')
+lock = FileLock(GAME_STATE_LOCK_FILE)
+
 
 def clean_json(json_string):
     json_string = re.sub(r',\s*([\]}])', r'\1', json_string)
@@ -28,16 +34,26 @@ def clean_json(json_string):
 
 def load_game_state(file_path):
     if os.path.exists(file_path):
-        with open(file_path, 'r') as file:
-            return json.load(file)
+        if file_path == GAME_STATE_FILE:
+            with lock:
+                with open(file_path, 'r') as file:
+                    return json.load(file)
+        else:
+            with open(file_path, 'r') as file:
+                return json.load(file)
     return INITIAL_GAME_STATE
 
 
 def save_game_state(game_state, file_path):
     json_string = json.dumps(game_state, indent=4)
     #cleaned_json_string = clean_json(json_string)
-    with open(file_path, 'w') as file:
-        file.write(json_string)
+    if file_path == GAME_STATE_FILE:
+        with lock:
+            with open(file_path, 'w') as file:
+                file.write(json_string)
+    else:
+        with open(file_path, 'w') as file:
+            file.write(json_string)
 
 
 @app.route('/gamestate', methods=['GET'])
@@ -46,7 +62,7 @@ def get_game_state():
     if file_path:
         game_state_file = file_path
     else:
-        game_state_file = 'game_state.json'
+        game_state_file = GAME_STATE_FILE
 
     game_state = load_game_state(game_state_file)
     return jsonify(game_state)
@@ -58,7 +74,7 @@ def update_game_state():
     if file_path:
         game_state_file = file_path
     else:
-        game_state_file = 'game_state.json'
+        game_state_file = GAME_STATE_FILE
 
     game_state = request.json
     save_game_state(game_state, game_state_file)
@@ -69,9 +85,9 @@ def update_game_state():
 def reset_game_state():
     directory_path = request.args.get('path', '')
     if directory_path:
-        game_state_file = os.path.join(directory_path, 'game_state.json')
+        game_state_file = os.path.join(directory_path, GAME_STATE_FILE)
     else:
-        game_state_file = 'game_state.json'
+        game_state_file = GAME_STATE_FILE
 
     initial_state = INITIAL_GAME_STATE
     save_game_state(initial_state, game_state_file)
@@ -102,9 +118,11 @@ def handle_autorun():
     current = request.args.get('selected', '')
     try:
         StoryRun(current).run()
+    except ManualModeError as e:
+        return jsonify({"error": str(e)}), 400
     except Exception as e:
         print(traceback.format_exc())
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": 'Internal Error, please try again'}), 500
     return jsonify({"status": "Autorun request received"}), 200
 
 

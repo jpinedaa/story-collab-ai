@@ -8,7 +8,7 @@ class ErrorDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Error'),
+      title: const Text('Status'),
       content: Text(message),
       actions: <Widget>[
         TextButton(

@@ -15,6 +15,8 @@ def narrator_scene_generation_node(state, agent, story):
         result = agent.invoke(temp_state)
         print(result.content)
         try:
+            if result.content == '':
+                raise ValueError('Empty response from agent')
             title, description, place, challenges, pickup_cards = parse_scene_generation(result.content)
             if story.get_place_by_title(place) is None:
                 raise ValueError(f"Place '{place}' is not a valid place card title.")
@@ -54,6 +56,8 @@ def move_generation_node(state, agent, story):
         result = agent.invoke(temp_state)
         print(result.content)
         try:
+            if result.content == '':
+                raise ValueError('Empty response from agent')
             played, description, challenges, pickup_cards = parse_move_generation(result.content)
             break
         except Exception as e:
@@ -78,13 +82,17 @@ def narrator_character_selection_node(state, agent, story):
         print(f'    {msg}')
     character = None
     while True:
-        print("Calling agent - narrator_character_selection")
         if story.get_auto_mode() == 0:
             break
+        print("Calling agent - narrator_character_selection")
         result = agent.invoke(temp_state)
         print(result.content)
         try:
+            if result.content == '':
+                raise ValueError('Empty response from agent')
             character = parse_character_selection(result.content)
+            if character is None:
+                raise ValueError('Character name not found in response')
             break
         except Exception as e:
             print(f'Error trying to parse output, Error: {e}, retrying')

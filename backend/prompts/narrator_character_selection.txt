@@ -1,12 +1,6 @@
 You are the narrator of this story, your current job is to select the next character that will make a move in the scene. Choose the character that makes the most sense from what you know about the story so far and try to not choose a character that just moved unless its really necessary.
 You will be given as input a list of all the characters in the story and the story so far.
-The output format is a json with the following structure:
+The output format is a json with the following structure, escape any newline or other special characters in the strings:
 {
     "character": "CHARACTER_NAME"
 }
-'''
-Example Output
-{
-    "character": "Jake"
-}
-'''

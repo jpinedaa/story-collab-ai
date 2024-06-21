@@ -15,7 +15,7 @@ class Narrator:
         with open(os.path.join(base_dir, "prompts/basic_rules.txt"), "r", encoding='utf-8') as f:
             basic_rules_prompt = f.read()
 
-        with open(os.path.join(base_dir, "prompts/narrator_scene_generation.txt"), "r") as f:
+        with open(os.path.join(base_dir, "prompts/narrator_scene_generation.txt"), "r", encoding='utf-8') as f:
             scene_generation_prompt = f.read()
 
         prompt = basic_rules_prompt + scene_generation_prompt
@@ -49,7 +49,7 @@ class Narrator:
         with open(os.path.join(base_dir, "prompts/basic_rules.txt"), "r", encoding='utf-8') as f:
             basic_rules_prompt = f.read()
 
-        with open(os.path.join(base_dir, "prompts/narrator_character_selection.txt"), "r") as f:
+        with open(os.path.join(base_dir, "prompts/narrator_character_selection.txt"), "r", encoding='utf-8') as f:
             character_selection_prompt = f.read()
 
         prompt = basic_rules_prompt + character_selection_prompt

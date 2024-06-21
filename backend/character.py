@@ -16,7 +16,7 @@ class Character:
         with open(os.path.join(base_dir, "prompts/basic_rules.txt"), "r", encoding='utf-8') as f:
             basic_rules_prompt = f.read()
 
-        with open(os.path.join(base_dir, "prompts/character_move_generation.txt"), "r") as f:
+        with open(os.path.join(base_dir, "prompts/character_move_generation.txt"), "r", encoding='utf-8') as f:
             move_generation_prompt = f.read()
 
         prompt = basic_rules_prompt + move_generation_prompt

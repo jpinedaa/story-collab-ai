@@ -1,7 +1,12 @@
 import random
-
+from langchain_google_genai import (
+    ChatGoogleGenerativeAI,
+    HarmBlockThreshold,
+    HarmCategory,
+)
 from cryptography.fernet import Fernet
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
+from langchain_openai import ChatOpenAI
 import json
 import os
 
@@ -40,4 +45,3 @@ def get_model():
         random_seed = random.randint(0, 100000)
         max_tokens = 4096
         return ChatNVIDIA(model=settings['model'], seed=random_seed, max_tokens=max_tokens)
-    return

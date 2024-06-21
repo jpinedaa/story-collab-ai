@@ -5,6 +5,8 @@ import traceback
 from filelock import FileLock
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from requests.compat import chardet
+
 from story_run import StoryRun
 from settings import encrypt_data, decrypt_data, SETTINGS_FILE
 

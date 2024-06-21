@@ -48,7 +48,9 @@ def parse_scene_generation(output):
             continue
 
     raise ValueError(
-        "No valid JSON object with the required structure found in the LLM output.")
+        "No valid JSON object with the required structure found in the LLM output. The expected format is:"
+        " {'title': 'scene_title', 'description': 'scene_description', 'place': 'place_card_title',"
+        " 'challenges': ['challenge_card_title'...], 'pickups': ['pickup_card_title'...]}.")
 
 
 def parse_move_generation(output):
@@ -70,12 +72,14 @@ def parse_move_generation(output):
             if all(key in parsed_output for key in
                    ["challenges", "played", "description", "pickups"]):
                 return parsed_output['played'], parsed_output['description'], \
-                parsed_output['challenges'], parsed_output['pickups']
+                       parsed_output['challenges'], parsed_output['pickups']
         except json.JSONDecodeError:
             continue
 
     raise ValueError(
-        "No valid JSON object with the required structure found in the LLM output.")
+        "No valid JSON object with the required structure found in the LLM output. The expected format is:"
+        " {'played': ['card_title'...], 'description': 'card_description', 'challenges': ['challenge_card_title'...],"
+        " 'pickups': ['pickup_card_title'...]}.")
 
 
 def parse_character_selection(output):
@@ -100,7 +104,8 @@ def parse_character_selection(output):
             continue
 
     raise ValueError(
-        "No valid JSON object with the required structure found in the LLM output.")
+        "No valid JSON object with the required structure found in the LLM output. The expected format is:"
+        " {'character': 'character_name'}.")
 
 
 def build_graph(state_class, nodes, edges, entry_point):

@@ -18,7 +18,7 @@ Narravive is an app that breathes life into stories through collaborative writin
 3. Hover your mouse over a character to see the full card for that character
 
 #### Creating Story Cards
-1. Select the narrator or the character you want to create a card for.
+1. Select the narrator or the character you want to create a card for
 2. Click the plus icon on the top right corner
 3. Click on create new card
 4. Write a title and description and set a card type

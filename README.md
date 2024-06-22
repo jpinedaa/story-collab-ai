@@ -13,7 +13,7 @@ Narravive is an app that breathes life into stories through collaborative writin
 3. Click save
 
 #### Selecting a Character
-1. Select the narrator or a character by clicking the respective card in the top
+1. Select the narrator or a character by clicking the respective card at the top
 2. The selected card will turn blue
 3. Hover your mouse over a character to see the full card for that character
 

@@ -4,10 +4,10 @@
 
 block_cipher = None
 
-a = Analysis(['server.py'],
+a = Analysis(['entry_point.py'],
              pathex=['.'],
              binaries=[],
-             datas=[('./state', './state'), ('./prompts', './prompts')],
+             datas=[('./state', './state'), ('./prompts', './prompts'), ('./frontend', './frontend')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
@@ -23,14 +23,15 @@ exe = EXE(pyz,
           a.scripts,
           [],
           exclude_binaries=True,
-          name='narravive_server',
+          name='Narravive',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
           upx_exclude=[],
           runtime_tmpdir=None,
-          console=False )
+          console=False,
+          icon='./app_icon.ico')
 
 coll = COLLECT(exe,
                a.binaries,
@@ -39,4 +40,4 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='narravive_server')
+               name='Narravive')

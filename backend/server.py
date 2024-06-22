@@ -58,6 +58,11 @@ def save_game_state(game_state, file_path):
             file.write(json_string)
 
 
+@app.route('/health')
+def health():
+    return "OK", 200
+
+
 @app.route('/gamestate', methods=['GET'])
 def get_game_state():
     file_path = request.args.get('path', '')

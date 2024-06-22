@@ -7,7 +7,7 @@ Narravive is an app that breathes life into stories through collaborative writin
 2. Unzip the file
 3. Run Narravive.exe
 
-#### Set Model
+#### Setting the model
 1. Click the settings Icon on the top right corner
 2. Set your api key and model from NVIDIA NIMS
 3. Click save
@@ -33,7 +33,37 @@ Narravive is an app that breathes life into stories through collaborative writin
     * Manual: Character is controlled by the user
     * NPC: Character is not controllable and can be used as an obstacle by the narrator
 
-#### To Edit a card
+#### Editing a card
+1. Select the narrator or the character you want to create a card for
+2. Click the plus icon on the top right corner
+3. Select the card you want to edit
+4. Click the blue pencil Icon at the top left corner
+5. Edit the desired text.
+6. Click Save
+
+#### Deleting a card
+1. Select the narrator or the character you want to create a card for
+2. Click the plus icon on the top right corner
+3. Select the card you want to delete
+4. Click the red trashcan Icon at the top left corner
+
+#### Duplicating a card
+1. Select the narrator or the character you want to create a card for
+2. Click the plus icon on the top right corner
+3. Select the card you want to duplicate
+4. Click the green plus 1 Icon at the top left corner
+
+#### Saving a story state
+1. Click the purple save button at the top right corner
+2. Select a directory and filename and click save.
+
+#### Opening a story state
+1. Click the yellow folder icon at the top right corner
+2. Select the story state file (.json) and click open
+
+#### Resetting a story state
+1. Save the current state or it will be deleted
+2. Click the red reset button at the top right corner
 
 ### Story Creation Flow
 #### Story Cards

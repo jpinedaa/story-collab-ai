@@ -3,7 +3,7 @@ Narravive is an app that breathes life into stories through collaborative writin
 
 ### Getting Started
 
-1. Download the latest release: https://github.com/jpinedaa/story-collab-ai/releases/tag/v.0.0.1 
+1. Download the latest release: [https://github.com/jpinedaa/story-collab-ai/releases/tag/v.0.0.1](https://github.com/jpinedaa/story-collab-ai/releases/tag/v.0.0.2) 
 2. Unzip the file
 3. run Narravive.bat
 

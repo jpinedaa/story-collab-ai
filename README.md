@@ -7,6 +7,34 @@ Narravive is an app that breathes life into stories through collaborative writin
 2. Unzip the file
 3. Run Narravive.exe
 
+#### Set Model
+1. Click the settings Icon on the top right corner
+2. Set your api key and model from NVIDIA NIMS
+3. Click save
+
+#### Selecting a Character
+1. Select the narrator or a character by clicking the respective card in the top
+2. The selected card will turn blue
+3. Hover your mouse over a character to see the full card for that character
+
+#### Creating Story Cards
+1. Select the narrator or the character you want to create a card for.
+2. Click the plus icon on the top right corner
+3. Click on create new card
+4. Write a title and description and set a card type
+5. Optional: click pick an image to select an image for the card
+6. Click Save
+
+#### Creating a character
+1. Select the narrator and create a new card
+2. In the card creation form select Character as the card type
+3. Set the player status
+    * Auto: Character is controlled by an agent
+    * Manual: Character is controlled by the user
+    * NPC: Character is not controllable and can be used as an obstacle by the narrator
+
+#### To Edit a card
+
 ### Story Creation Flow
 #### Story Cards
 Story cards represent different aspects of your story such as people, places, and situations. 

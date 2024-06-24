@@ -9,7 +9,7 @@ Narravive is an app that breathes life into stories through collaborative writin
 
 #### Setting the model
 1. Click the settings Icon on the top right corner
-2. Set your api key and model from (NVIDIA NIMS)[https://build.nvidia.com/explore/discover]
+2. Set your api key and model from [NVIDIA NIMS](https://build.nvidia.com/explore/discover)
 3. Click save
 
 #### Selecting a Character

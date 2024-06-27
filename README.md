@@ -1,7 +1,9 @@
 ## Narravive
 Narravive is an app that breathes life into stories through collaborative writing. Using story cards, you can craft rich narratives as various agents take control of different characters. Whether you let the agents operate independently or choose to guide characters yourself, you can seamlessly collaborate with both humans and AI agents. Narravive transforms storytelling into a distributed and asynchronous experience, allowing complex narratives to emerge organically from the interplay of multiple contributors.
 
-https://github.com/jpinedaa/story-collab-ai/assets/22211084/b89e6286-f276-442c-9a3c-599b7f213572
+https://github.com/jpinedaa/story-collab-ai/assets/22211084/9b118c1e-0aba-433e-aba6-52cb26305a71
+
+[Watch in Youtube](https://youtu.be/VYJJVNv73L0?si=Tt-Gs75gINKLsJeF)
 
 ### Getting Started
 

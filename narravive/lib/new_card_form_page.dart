@@ -144,7 +144,9 @@ class NewCardFormPageState extends State<NewCardFormPage> {
     List<DropdownMenuItem<String>> playerStatusItems = PlayerStatus.values
         .map((status) => DropdownMenuItem<String>(
               value: status.toString(),
-              child: Text(status.toString().split('.').last),
+              child: Text(
+                status.toString().split('.').last,
+              ),
             ))
         .toList();
 

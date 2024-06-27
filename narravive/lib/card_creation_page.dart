@@ -87,7 +87,9 @@ class CardCreationPage extends StatelessWidget {
           };
 
     return Scaffold(
-      appBar: AppBar(title: Text('Card Creation for ${player.name}')),
+      appBar: AppBar(
+          title: Text(
+              'Card Creation for ${player.name != '' ? player.name : 'Narrator'}')),
       body: Stack(
         children: [
           Padding(
@@ -142,11 +144,15 @@ Widget buildCardCategory(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: Text(
           category,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 0, 0, 0)),
         ),
       ),
       if (cards.isEmpty)
-        const Text('No cards available in this category.')
+        const Text('No cards available in this category.',
+            style: TextStyle(color: Color.fromARGB(255, 0, 0, 0)))
       else
         Wrap(
           spacing: 8.0,

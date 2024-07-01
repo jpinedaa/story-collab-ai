@@ -142,6 +142,7 @@ Narravive integrates NVIDIA technologies for a seamless storytelling experience:
 * Model Selection: Choose the best models for your needs.
 * API Key Encryption: Ensures security for your keys.
 * Langgraph: Facilitates modularizable agents.
+
 Collaborative Writing rules are taken from Storium, an attempt at dividing storytelling into its core components to allow people to collaborate on story telling:
 * [Storium](https://storium.com/)
 * [Story Cards from Demo](https://storium.com/world/monster-academy)

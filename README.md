@@ -14,7 +14,7 @@ https://github.com/jpinedaa/story-collab-ai/assets/22211084/9b118c1e-0aba-433e-a
 #### Setting the model
 1. Click the settings Icon on the top right corner
 2. Set your api key and model from [NVIDIA NIMS](https://build.nvidia.com/explore/discover)
-  * Sign up and you can get a free api key [here](https://build.nvidia.com/explore/discover#llama3-70b)
+    * Sign up and you can get a free api key [here](https://build.nvidia.com/explore/discover#llama3-70b)
 4. Click save
 
 #### Selecting a Character

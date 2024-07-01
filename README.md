@@ -1,5 +1,5 @@
 ## Narravive
-Narravive is an app that breathes life into stories through collaborative writing. Using story cards, you can craft rich narratives as various agents take control of different characters. Whether you let the agents operate independently or choose to guide characters yourself, you can seamlessly collaborate with both humans and AI agents. Narravive transforms storytelling into a distributed and asynchronous experience, allowing complex narratives to emerge organically from the interplay of multiple contributors.
+Narravive is an app that breathes life into stories through collaborative writing rules (Storium). Using story cards, you can craft rich narratives as various agents take control of different characters. Whether you let the agents operate independently or choose to guide characters yourself, you can seamlessly collaborate with both humans and AI agents. Narravive transforms storytelling into a distributed and asynchronous experience, allowing complex narratives to emerge organically from the interplay of multiple contributors.
 
 https://github.com/jpinedaa/story-collab-ai/assets/22211084/9b118c1e-0aba-433e-aba6-52cb26305a71
 
@@ -142,6 +142,9 @@ Narravive integrates NVIDIA technologies for a seamless storytelling experience:
 * Model Selection: Choose the best models for your needs.
 * API Key Encryption: Ensures security for your keys.
 * Langgraph: Facilitates modularizable agents.
+Collaborative Writing rules are taken from Storium, an attempt at dividing storytelling into its core components to allow people to collaborate on story telling:
+* [Storium](https://storium.com/)
+* [Story Cards from Demo](https://storium.com/world/monster-academy)
 
 ### Conclusion
 Narravive offers a unique platform for dynamic, collaborative storytelling. Whether you're controlling characters or letting AI agents drive the narrative, the stories created are truly living and organic.
